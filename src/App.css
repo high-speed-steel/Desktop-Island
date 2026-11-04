@@ -20,9 +20,9 @@
   --glass-border-alpha: 0.23;
   --glass-inner-accent-alpha: 0.058;
   --glass-highlight-opacity: 0.61;
-  --glass-panel-blur: 18px;
-  --glass-tint-color: rgba(47, 47, 55, 0.53);
-  --glass-collapsed-tint-color: rgba(47, 47, 55, 0.8);
+  --glass-panel-blur: 24px;
+  --glass-tint-color: rgba(14, 14, 20, 0.82);
+  --glass-collapsed-tint-color: rgba(14, 14, 20, 0.85);
   --glass-page-accent: 116, 214, 255;
   --glass-pointer-x: 50%;
   --glass-pointer-y: 18%;
@@ -440,84 +440,78 @@ body, html {
 .appearance-liquidGlass .island-capsule {
   isolation: isolate;
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.11), transparent 42%),
-    linear-gradient(180deg, transparent 48%, rgba(6, 16, 24, 0.1)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 42%),
+    linear-gradient(180deg, transparent 48%, rgba(0, 0, 0, 0.25)),
     var(--glass-collapsed-tint-color) !important;
   box-shadow:
-    0 12px 34px rgba(0, 0, 0, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.36),
-    inset 0 -1px 0 rgba(8, 22, 32, 0.18),
-    inset 1px 0 0 rgba(116, 214, 255, 0.18),
-    inset -1px 0 0 rgba(255, 156, 224, 0.12) !important;
-  backdrop-filter: blur(var(--glass-panel-blur)) saturate(1.22) !important;
-  -webkit-backdrop-filter: blur(var(--glass-panel-blur)) saturate(1.22) !important;
-  color: #f8f6f0 !important;
-  border: none !important;
+    0 14px 38px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45),
+    inset 1px 0 0 rgba(255, 255, 255, 0.1),
+    inset -1px 0 0 rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(var(--glass-panel-blur)) saturate(1.8) !important;
+  -webkit-backdrop-filter: blur(var(--glass-panel-blur)) saturate(1.8) !important;
+  color: #f3f4f6 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 .appearance-liquidGlass .island-capsule:hover {
   box-shadow:
-    0 8px 26px rgba(0, 0, 0, 0.25),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.38),
-    inset 0 0 18px rgba(255, 255, 255, 0.12),
-    inset 1px 0 0 rgba(116, 214, 255, 0.26),
-    inset -1px 0 0 rgba(255, 156, 224, 0.18) !important;
+    0 16px 42px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+    inset 1px 0 0 rgba(255, 255, 255, 0.15),
+    inset -1px 0 0 rgba(255, 255, 255, 0.15) !important;
 }
 
 .appearance-liquidGlass .island-expanded-panel {
   isolation: isolate;
   background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.36), transparent 96px),
-    linear-gradient(
-      145deg,
-      rgba(255, 255, 255, var(--glass-soft-alpha)),
-      transparent 42%
-    ),
-    linear-gradient(
-      165deg,
-      transparent 42%,
-      rgba(2, 8, 14, 0.08)
-    ),
-    var(--glass-tint-color) !important;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 84px),
+    linear-gradient(180deg, rgba(20, 20, 28, 0.84), rgba(12, 12, 18, 0.9)) !important;
   box-shadow:
-    0 18px 46px rgba(0, 0, 0, var(--glass-shadow-alpha)),
-    inset 0 1px 0 rgba(255, 255, 255, var(--glass-inset-alpha)),
-    inset 0 -1px 0 rgba(8, 18, 28, 0.16),
-    inset 1px 0 0 rgba(130, 224, 255, var(--glass-cyan-alpha)),
-    inset -1px 0 0 rgba(255, 158, 230, var(--glass-magenta-alpha)) !important;
-  backdrop-filter: blur(var(--glass-panel-blur)) saturate(1.22) !important;
-  -webkit-backdrop-filter: blur(var(--glass-panel-blur)) saturate(1.22) !important;
-  color: #f8f6f0 !important;
-  border: none !important;
+    0 24px 54px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45),
+    inset 1px 0 0 rgba(255, 255, 255, 0.1),
+    inset -1px 0 0 rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(var(--glass-panel-blur)) saturate(1.8) !important;
+  -webkit-backdrop-filter: blur(var(--glass-panel-blur)) saturate(1.8) !important;
+  color: #f3f4f6 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 .appearance-liquidGlass .island-tab-header {
-  background: rgba(255, 255, 255, 0.04) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(0, 0, 0, 0.3) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 .appearance-liquidGlass .browser-tab-item {
-  color: #000000 !important;
-  background: rgba(255, 255, 255, 0.65) !important;
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   backdrop-filter: blur(8px) !important;
 }
 
 .appearance-liquidGlass .browser-tab-item:hover {
-  background: rgba(255, 255, 255, 0.9) !important;
-  color: #000000 !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+  color: #ffffff !important;
 }
 
 .appearance-liquidGlass .browser-tab-item.active {
-  background: #ffffff !important;
-  color: #000000 !important;
-  font-weight: 700 !important;
-  border: 1px solid #ffffff !important;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35) !important;
+  background: rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35) !important;
 }
 
 .appearance-liquidGlass .action-icon-btn {
-  color: rgba(255, 255, 255, 0.7) !important;
+  color: rgba(255, 255, 255, 0.72) !important;
 }
 
 .appearance-liquidGlass .action-icon-btn:hover {
@@ -533,8 +527,9 @@ body, html {
 .appearance-liquidGlass .translate-box-source,
 .appearance-liquidGlass .translate-box-target {
   background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
   backdrop-filter: blur(12px) !important;
+  color: #f3f4f6 !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -667,25 +662,25 @@ body, html {
 .appearance-classic .island-capsule {
   isolation: isolate;
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6) 42%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(240, 240, 245, 0.6)) !important;
+    linear-gradient(145deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.22) 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(245, 245, 250, 0.26)) !important;
   box-shadow:
-    0 10px 28px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.06),
-    inset 1px 0 0 rgba(255, 255, 255, 0.6),
-    inset -1px 0 0 rgba(255, 255, 255, 0.6) !important;
-  backdrop-filter: blur(20px) saturate(1.8) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
-  color: #111111 !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.65) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.65) !important;
-  border-left: 1px solid rgba(255, 255, 255, 0.65) !important;
+    0 12px 32px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.04),
+    inset 1px 0 0 rgba(255, 255, 255, 0.5),
+    inset -1px 0 0 rgba(255, 255, 255, 0.5) !important;
+  backdrop-filter: blur(24px) saturate(1.8) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.8) !important;
+  color: #111827 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.5) !important;
 }
 
 .appearance-whiteGlass .capsule-dot,
 .appearance-classic .capsule-dot {
-  background-color: #111111 !important;
+  background-color: #1f2937 !important;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.25) !important;
 }
 
@@ -693,48 +688,48 @@ body, html {
 .appearance-classic .island-expanded-panel {
   isolation: isolate;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.76) 120px, rgba(248, 248, 252, 0.82)) !important;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0.36) 120px, rgba(245, 245, 250, 0.42)) !important;
   box-shadow:
-    0 20px 48px rgba(0, 0, 0, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.98),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.06),
-    inset 1px 0 0 rgba(255, 255, 255, 0.7),
-    inset -1px 0 0 rgba(255, 255, 255, 0.7) !important;
-  backdrop-filter: blur(26px) saturate(1.6) !important;
-  -webkit-backdrop-filter: blur(26px) saturate(1.6) !important;
+    0 22px 52px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05),
+    inset 1px 0 0 rgba(255, 255, 255, 0.6),
+    inset -1px 0 0 rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(28px) saturate(1.8) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.8) !important;
   color: #18181b !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.85) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.85) !important;
-  border-left: 1px solid rgba(255, 255, 255, 0.85) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.6) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.6) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.6) !important;
 }
 
 .appearance-whiteGlass .island-tab-header,
 .appearance-classic .island-tab-header {
-  background: rgba(255, 255, 255, 0.5) !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
 }
 
 .appearance-whiteGlass .browser-tab-item,
 .appearance-classic .browser-tab-item {
-  color: #000000 !important;
-  background: rgba(255, 255, 255, 0.65) !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  backdrop-filter: blur(8px) !important;
+  color: #374151 !important;
+  background: rgba(255, 255, 255, 0.32) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  backdrop-filter: blur(10px) !important;
 }
 
 .appearance-whiteGlass .browser-tab-item:hover,
 .appearance-classic .browser-tab-item:hover {
-  background: rgba(255, 255, 255, 0.92) !important;
-  color: #000000 !important;
+  background: rgba(255, 255, 255, 0.58) !important;
+  color: #111827 !important;
 }
 
 .appearance-whiteGlass .browser-tab-item.active,
 .appearance-classic .browser-tab-item.active {
-  background: #ffffff !important;
-  color: #000000 !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  color: #111827 !important;
   font-weight: 700 !important;
-  border: 1px solid rgba(0, 0, 0, 0.22) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
 }
 
 .appearance-whiteGlass .action-icon-btn,
@@ -768,11 +763,11 @@ body, html {
 .appearance-classic .shelf-item,
 .appearance-classic .translate-box-source,
 .appearance-classic .translate-box-target {
-  background: rgba(255, 255, 255, 0.6) !important;
-  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  background: rgba(255, 255, 255, 0.32) !important;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
   color: #1f2937 !important;
-  backdrop-filter: blur(12px) !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03) !important;
+  backdrop-filter: blur(14px) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
 }
 
 /* 亮色主題通用文字深色適配 (純白 pureWhite 與 白玻璃 whiteGlass) */
