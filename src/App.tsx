@@ -11,7 +11,6 @@ import {
   ListTodo,
   Languages,
   Pin,
-  X,
   Settings,
 } from "lucide-react";
 
@@ -598,7 +597,7 @@ export const App: React.FC = () => {
               })}
             </div>
 
-            {/* 右上角操作控制：設定、釘選與關閉至托盤 */}
+            {/* 右上角操作控制：設定與釘選 */}
             <div className="tab-actions">
               <button
                 type="button"
@@ -619,14 +618,6 @@ export const App: React.FC = () => {
                 }
               >
                 <Pin size={13} className={isPinned ? "pinned-icon" : ""} />
-              </button>
-              <button
-                type="button"
-                className="action-icon-btn close-btn"
-                onClick={() => invoke("minimize_island")}
-                title="關閉至工作列托盤 (點擊右下角工作列圖示可隨時重新開啟)"
-              >
-                <X size={15} />
               </button>
             </div>
           </div>
