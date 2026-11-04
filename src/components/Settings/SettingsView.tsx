@@ -582,7 +582,7 @@ export const SettingsView: React.FC = () => {
                     <input
                       type="text"
                       className="form-input"
-                      placeholder="例：個人 Gmail / 台大校園信箱 / 工作"
+                      placeholder="例：個人 Gmail / 校園信箱 / 工作"
                       value={accountForm.name}
                       onChange={(e) =>
                         setAccountForm({ ...accountForm, name: e.target.value })
@@ -596,7 +596,7 @@ export const SettingsView: React.FC = () => {
                     <input
                       type="email"
                       className="form-input"
-                      placeholder="例：username@gmail.com 或 student@ntu.edu.tw"
+                      placeholder="例：username@gmail.com 或 user@school.edu"
                       value={accountForm.email}
                       onChange={(e) =>
                         setAccountForm({ ...accountForm, email: e.target.value })
