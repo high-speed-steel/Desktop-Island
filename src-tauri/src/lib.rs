@@ -32,7 +32,7 @@ use tauri::{
 use windows::Win32::{
     Foundation::{POINT, RECT},
     Graphics::Gdi::SetWindowRgn,
-    UI::Input::KeyboardAndMouse::{GetAsyncKeyState, VK_LBUTTON},
+    UI::Input::KeyboardAndMouse::{GetAsyncKeyState, VK_LBUTTON, VK_RBUTTON},
     UI::WindowsAndMessaging::{GetCursorPos, GetWindowRect},
 };
 
@@ -75,7 +75,7 @@ static WINDOW_STATE: OnceLock<Mutex<IslandWindowState>> = OnceLock::new();
 static POSITION_ANIMATION_GENERATION: AtomicU64 = AtomicU64::new(0);
 static NATIVE_GLASS_INITIALIZED: OnceLock<()> = OnceLock::new();
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 enum IslandMode {
     Collapsed,
     Expanded,
@@ -109,6 +109,7 @@ impl IslandMode {
 struct IslandWindowState {
     mode: IslandMode,
     is_tucked: bool,
+    is_pinned: bool,
     collapsed_scale: f64,
     expanded_scale: f64,
     margin_y: f64,
@@ -155,6 +156,7 @@ impl Default for IslandWindowState {
         Self {
             mode: IslandMode::Collapsed,
             is_tucked: false,
+            is_pinned: false,
             collapsed_scale: DEFAULT_COLLAPSED_SCALE,
             expanded_scale: DEFAULT_EXPANDED_SCALE,
             margin_y: DEFAULT_MARGIN_Y,
@@ -251,6 +253,15 @@ fn set_island_layout(app: AppHandle, layout: IslandLayout) -> Result<(), String>
 }
 
 #[tauri::command]
+fn set_island_pinned(pinned: bool) -> Result<(), String> {
+    mutate_window_state(|state| {
+        state.is_pinned = pinned;
+        *state
+    });
+    Ok(())
+}
+
+#[tauri::command]
 fn set_island_interaction(
     app: AppHandle,
     mode: String,
@@ -261,6 +272,7 @@ fn set_island_interaction(
     collapsed_width: Option<f64>,
     custom_position: Option<IslandPosition>,
     is_tucked: Option<bool>,
+    is_pinned: Option<bool>,
     animate_position: Option<bool>,
     glass_enabled: Option<bool>,
     glass_intensity: Option<f64>,
@@ -280,6 +292,9 @@ fn set_island_interaction(
     let state = mutate_window_state(|state| {
         state.mode = mode;
         state.is_tucked = is_tucked.unwrap_or(false);
+        if let Some(is_pinned) = is_pinned {
+            state.is_pinned = is_pinned;
+        }
         state.collapsed_scale = collapsed_scale.clamp(0.75, 1.4);
         state.expanded_scale = expanded_scale.clamp(0.75, 1.4);
         if let Some(margin_y) = margin_y {
@@ -1600,9 +1615,11 @@ fn record_dragged_position(position: PhysicalPosition<i32>) {
 fn start_cursor_passthrough_loop(window: WebviewWindow) {
     thread::spawn(move || {
         let mut ignoring_cursor = false;
+        let mut was_button_down = false;
 
         loop {
-            let should_ignore = !cursor_is_inside_island(&window);
+            let is_inside = cursor_is_inside_island(&window);
+            let should_ignore = !is_inside;
 
             if should_ignore != ignoring_cursor {
                 if window.set_ignore_cursor_events(should_ignore).is_ok() {
@@ -1610,7 +1627,20 @@ fn start_cursor_passthrough_loop(window: WebviewWindow) {
                 }
             }
 
-            thread::sleep(Duration::from_millis(12));
+            let button_down = unsafe {
+                GetAsyncKeyState(VK_LBUTTON.0 as i32) < 0 || GetAsyncKeyState(VK_RBUTTON.0 as i32) < 0
+            };
+
+            // 當處於展開態、非釘選、非拖曳中，且使用者在島外按下左鍵或右鍵時，發送自動收合事件
+            if button_down && !was_button_down && !is_inside {
+                let state = read_window_state();
+                if state.mode == IslandMode::Expanded && !state.is_pinned && !state.is_dragging {
+                    let _ = window.emit("auto-collapse-island", ());
+                }
+            }
+            was_button_down = button_down;
+
+            thread::sleep(Duration::from_millis(16));
         }
     });
 }
@@ -2074,6 +2104,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             set_island_layout,
             set_island_interaction,
+            set_island_pinned,
             start_island_drag,
             reset_island_position,
             save_todo_markdown,

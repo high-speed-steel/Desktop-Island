@@ -10,7 +10,7 @@ import {
   FolderDown,
   ListTodo,
   Languages,
-  Minus,
+  Pin,
   X,
   Settings,
 } from "lucide-react";
@@ -104,6 +104,30 @@ export const App: React.FC = () => {
   // 是否已拖出螢幕頂端邊界（懸浮模式）
   const [isDetached, setIsDetached] = useState(false);
 
+  // 面板釘選狀態：若釘選，點擊島外不自動收合；未釘選時點擊島外自動收合
+  const [isPinned, setIsPinned] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("focusd-island-pinned") === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const togglePin = useCallback(() => {
+    setIsPinned((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("focusd-island-pinned", String(next));
+      } catch {}
+      invoke("set_island_pinned", { pinned: next }).catch(() => {});
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    invoke("set_island_pinned", { pinned: isPinned }).catch(() => {});
+  }, [isPinned]);
+
   // 監聽原生島嶼位置變更事件（即時獲知是否拖出吸頂邊界）
   useEffect(() => {
     let unlisten: (() => void) | undefined;
@@ -159,10 +183,11 @@ export const App: React.FC = () => {
       margin_y: 0.0,
       expandedHeight: isExpanded ? 385 : 36,
       collapsedWidth: 300,
+      is_pinned: isPinned,
     }).catch(() => {
       // 容錯（在非 Tauri 瀏覽器環境下忽略）
     });
-  }, []);
+  }, [isPinned]);
 
   // 初次掛載通知 Tauri 視窗就緒
   useEffect(() => {
@@ -216,6 +241,36 @@ export const App: React.FC = () => {
       console.error("開啟設定視窗失敗:", err);
     });
   }, []);
+
+  // 監聽原生島外點擊自動收合事件（未釘選狀態下點擊島外自動摺疊）
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    listen("auto-collapse-island", () => {
+      if (mode === "expanded" && !isPinned) {
+        collapseIsland();
+      }
+    }).then((fn) => {
+      unlisten = fn;
+    });
+    return () => {
+      if (unlisten) unlisten();
+    };
+  }, [mode, isPinned, collapseIsland]);
+
+  // 視窗失去焦點時（例如點擊其他全螢幕程式或桌面），若未釘選則自動收合
+  useEffect(() => {
+    const handleWindowBlur = () => {
+      if (mode === "expanded" && !isPinned) {
+        setTimeout(() => {
+          if (!document.hasFocus() && mode === "expanded" && !isPinned) {
+            collapseIsland();
+          }
+        }, 120);
+      }
+    };
+    window.addEventListener("blur", handleWindowBlur);
+    return () => window.removeEventListener("blur", handleWindowBlur);
+  }, [mode, isPinned, collapseIsland]);
 
   // 全域鍵盤監聽：Tab / Shift+Tab 切換分頁，Esc 關閉/摺疊
   useEffect(() => {
@@ -543,7 +598,7 @@ export const App: React.FC = () => {
               })}
             </div>
 
-            {/* 右上角操作控制：設定、收合與關閉至托盤 */}
+            {/* 右上角操作控制：設定、釘選與關閉至托盤 */}
             <div className="tab-actions">
               <button
                 type="button"
@@ -555,11 +610,15 @@ export const App: React.FC = () => {
               </button>
               <button
                 type="button"
-                className="action-icon-btn"
-                onClick={collapseIsland}
-                title="摺疊為膠囊態 (Esc)"
+                className={`action-icon-btn pin-btn ${isPinned ? "is-pinned" : ""}`}
+                onClick={togglePin}
+                title={
+                  isPinned
+                    ? "已釘選展開態（點擊島外不收合，點此取消釘選）"
+                    : "釘選展開態（目前點擊島外將自動收合）"
+                }
               >
-                <Minus size={14} />
+                <Pin size={13} className={isPinned ? "pinned-icon" : ""} />
               </button>
               <button
                 type="button"

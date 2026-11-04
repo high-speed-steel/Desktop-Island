@@ -339,6 +339,16 @@ body, html {
   transition: all 0.2s;
 }
 
+.action-icon-btn.pin-btn.is-pinned {
+  color: #38bdf8 !important;
+  background: rgba(56, 189, 248, 0.18) !important;
+}
+
+.action-icon-btn.pin-btn.is-pinned .pinned-icon {
+  transform: rotate(-45deg);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 /* 內容主體區 */
 .island-content-body {
   flex: 1;
