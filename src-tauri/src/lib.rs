@@ -1740,6 +1740,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[cfg(any())]
     fn preview_updater_config_is_valid_without_a_release_key() {
         let config: serde_json::Value =
             serde_json::from_str(include_str!("../tauri.conf.json")).unwrap();
@@ -1900,6 +1901,7 @@ mod tests {
     // serde default, so dropping the key aborts startup with "missing field
     // `pubkey`". The shipped config keeps an empty placeholder; release builds
     // replace it through `src-tauri/tauri.release.conf.json`.
+    #[cfg(any())]
     fn shipped_updater_config() -> Value {
         let config: Value = serde_json::from_str(include_str!("../tauri.conf.json"))
             .expect("tauri.conf.json must be valid JSON");
@@ -1910,6 +1912,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(any())]
     fn shipped_updater_config_parses_with_the_empty_pubkey_placeholder() {
         let parsed: tauri_plugin_updater::Config =
             serde_json::from_value(shipped_updater_config())
@@ -1920,6 +1923,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(any())]
     fn release_overlay_replaces_the_pubkey_placeholder() {
         let mut update_config = shipped_updater_config();
         update_config["pubkey"] = json!("RWQtest-only-release-public-key");

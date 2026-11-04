@@ -42,9 +42,6 @@ export default function TranslationWindow() {
   const [shortcutError, setShortcutError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
-  const [secretDraft, setSecretDraft] = useState("");
-  const [hasSecret, setHasSecret] = useState(false);
-  const [savingSecret, setSavingSecret] = useState(false);
   const [didCopy, setDidCopy] = useState(false);
   const [recordingShortcut, setRecordingShortcut] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -58,9 +55,6 @@ export default function TranslationWindow() {
       : t.translator.bilingual;
 
   useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(settings)); }, [settings]);
-  useEffect(() => {
-    void invoke<boolean>("has_translation_secret").then(setHasSecret).catch((failure) => setError(String(failure)));
-  }, []);
   useEffect(() => {
     void invoke<string>("set_translation_shortcut", { shortcut: settings.shortcut })
       .then(() => setShortcutError(""))
@@ -154,26 +148,6 @@ export default function TranslationWindow() {
     }
   };
 
-  const saveSecret = async () => {
-    if (!secretDraft.trim()) return;
-    setSavingSecret(true);
-    try {
-      await invoke("save_translation_secret", { secret: secretDraft });
-      setSecretDraft("");
-      setHasSecret(true);
-      setError("");
-    } catch (failure) { setError(String(failure)); }
-    finally { setSavingSecret(false); }
-  };
-
-  const removeSecret = async () => {
-    try {
-      await invoke("delete_translation_secret");
-      setHasSecret(false);
-      setSecretDraft("");
-    } catch (failure) { setError(String(failure)); }
-  };
-
   const copyResult = async () => {
     if (!output) return;
     try {
@@ -219,13 +193,25 @@ export default function TranslationWindow() {
 
         {showConfig ? (
           <section className="translation-window__config">
-            <div className="translation-window__section-heading"><h2>{t.translator.settings}</h2><p>{t.translator.credentialHint}</p></div>
-            <label className="translation-window__field"><span>{t.translator.secret} {hasSecret && <em>{t.common.saved}</em>}</span>
-              <input type="password" autoComplete="off" value={secretDraft} onChange={(event) => setSecretDraft(event.target.value)} placeholder={hasSecret ? t.translator.replaceSecret : t.translator.enterSecret} />
-            </label>
-            <div className="translation-window__config-actions">
-              <button type="button" className="translation-window__primary" onClick={() => void saveSecret()} disabled={!secretDraft.trim() || savingSecret}>{t.translator.saveSecret}</button>
-              {hasSecret && <button type="button" className="translation-window__secondary" onClick={() => void removeSecret()}>{t.translator.deleteSecret}</button>}
+            <div className="translation-window__section-heading">
+              <h2>{t.translator.settings}</h2>
+              <p>純本機離線翻譯（Firefox Bergamot / Marian NMT 引擎），使用本機 CPU 快速推理，體積輕巧，無需 API Key、無需聯網。</p>
+            </div>
+            <div
+              style={{
+                fontSize: "12px",
+                color: "rgba(255, 255, 255, 0.7)",
+                background: "rgba(255, 255, 255, 0.05)",
+                padding: "10px 12px",
+                borderRadius: "8px",
+                lineHeight: "1.6",
+                marginBottom: "8px",
+              }}
+            >
+              <div style={{ fontWeight: 600, color: "#818cf8", marginBottom: "4px" }}>
+                ✓ 本機離線引擎已就緒
+              </div>
+              支援英文 ⇄ 繁體中文 / 簡體中文雙向極速翻譯，資料完全保留於本機。
             </div>
             <label className="translation-window__field"><span>{t.translator.shortcut}</span>
               <input readOnly value={recordingShortcut ? t.translator.pressShortcut : settings.shortcut} onFocus={() => setRecordingShortcut(true)} onBlur={() => setRecordingShortcut(false)} onKeyDown={(event) => {
@@ -252,7 +238,7 @@ export default function TranslationWindow() {
                 <ArrowRight size={15} aria-hidden="true" />
                 <span>{targetLanguage}</span>
               </div>
-              <span className="translation-window__provider">DeepSeek AI</span>
+              <span className="translation-window__provider">Bergamot 離線</span>
             </div>
             <div className="translation-window__content">
               <section className="translation-window__panel translation-window__source">
@@ -272,7 +258,7 @@ export default function TranslationWindow() {
               </section>
             </div>
             <footer className="translation-window__footer">
-              <div className="translation-window__footer-info">{error ? <span className="translation-window__error" role="alert">{error}</span> : !hasSecret ? <button type="button" className="translation-window__setup" onClick={() => setShowConfig(true)}>{t.translator.configureSecret}</button> : <span>{t.translator.enterHint}</span>}</div>
+              <div className="translation-window__footer-info">{error ? <span className="translation-window__error" role="alert">{error}</span> : <span>{t.translator.enterHint}</span>}</div>
               <button type="button" className="translation-window__primary translation-window__translate" onClick={() => void submit()} disabled={isLoading}>{isLoading ? t.translator.loading : t.translator.translate} {!isLoading && <ArrowRight size={15} />}</button>
             </footer>
           </>
