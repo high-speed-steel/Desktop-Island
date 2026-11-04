@@ -10,6 +10,12 @@ import {
   markdownToTodos,
   type TodoItem,
 } from '../Pages/TodoView';
+import {
+  MAIL_SETTINGS_KEY,
+  MAIL_CACHE_KEY,
+  type MailRetentionSettings,
+  getMailRetentionSettings,
+} from '../Pages/UnifiedMailView';
 import './SettingsView.css';
 
 export interface ModuleManifest {
@@ -102,6 +108,19 @@ export const SettingsView: React.FC = () => {
   const [isEditingAccount, setIsEditingAccount] = useState(false);
   const [isTestingMail, setIsTestingMail] = useState(false);
   const [mailTestStatus, setMailTestStatus] = useState<{ success: boolean; message: string } | null>(null);
+  const [retentionSettings, setRetentionSettings] = useState<MailRetentionSettings>(() => {
+    return getMailRetentionSettings();
+  });
+  const [cachedMailCount, setCachedMailCount] = useState<number>(() => {
+    try {
+      const cached = localStorage.getItem(MAIL_CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed)) return parsed.length;
+      }
+    } catch {}
+    return 0;
+  });
   const [accountForm, setAccountForm] = useState<MailAccountConfig>({
     id: '',
     name: '',
@@ -386,6 +405,23 @@ export const SettingsView: React.FC = () => {
     }
     saveMailAccounts(updated);
     setIsEditingAccount(false);
+  };
+
+  const handleUpdateRetentionSettings = (patch: Partial<MailRetentionSettings>) => {
+    const updated = { ...retentionSettings, ...patch };
+    setRetentionSettings(updated);
+    try {
+      localStorage.setItem(MAIL_SETTINGS_KEY, JSON.stringify(updated));
+      window.dispatchEvent(new Event('storage'));
+    } catch {}
+  };
+
+  const handleClearMailCache = () => {
+    try {
+      localStorage.removeItem(MAIL_CACHE_KEY);
+      setCachedMailCount(0);
+      window.dispatchEvent(new Event('storage'));
+    } catch {}
   };
 
   if (!appConfig) {
@@ -736,6 +772,121 @@ export const SettingsView: React.FC = () => {
                 )}
               </div>
             )}
+
+            {/* 信箱快取與保留原則 */}
+            <div
+              style={{
+                marginTop: '20px',
+                padding: '16px',
+                borderRadius: '12px',
+                background: 'rgba(255, 255, 255, 0.04)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '14px',
+                }}
+              >
+                <div>
+                  <h4
+                    style={{
+                      margin: 0,
+                      fontSize: '13.5px',
+                      color: '#ffffff',
+                      fontWeight: 600,
+                    }}
+                  >
+                    信件快取與保留原則
+                  </h4>
+                  <p
+                    style={{
+                      margin: '4px 0 0',
+                      fontSize: '11.5px',
+                      color: '#9ca3af',
+                    }}
+                  >
+                    開啟時優先載入本地郵件摘要（秒開），並於背景異步檢查最新信件。
+                  </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      color: '#9ca3af',
+                      background: 'rgba(255, 255, 255, 0.06)',
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                    }}
+                  >
+                    目前快取：{cachedMailCount} 封
+                  </span>
+                  <button
+                    type="button"
+                    className="icon-action-btn delete"
+                    onClick={handleClearMailCache}
+                    title="清空本地所有郵件快取"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '11px',
+                      padding: '4px 8px',
+                    }}
+                  >
+                    <Trash2 size={12} />
+                    <span>清除快取</span>
+                  </button>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '16px',
+                }}
+              >
+                <div className="form-group">
+                  <label className="form-label">最大保留條數</label>
+                  <select
+                    className="form-input"
+                    value={retentionSettings.maxItems}
+                    onChange={(e) =>
+                      handleUpdateRetentionSettings({
+                        maxItems: parseInt(e.target.value) || 30,
+                      })
+                    }
+                  >
+                    <option value={15}>保留最新 15 條</option>
+                    <option value={30}>保留最新 30 條 (建議)</option>
+                    <option value={50}>保留最新 50 條</option>
+                    <option value={100}>保留最新 100 條</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">最大保留天數</label>
+                  <select
+                    className="form-input"
+                    value={retentionSettings.retentionDays}
+                    onChange={(e) =>
+                      handleUpdateRetentionSettings({
+                        retentionDays: parseInt(e.target.value) || 7,
+                      })
+                    }
+                  >
+                    <option value={3}>3 天內郵件</option>
+                    <option value={7}>7 天內郵件 (建議)</option>
+                    <option value={14}>14 天內郵件</option>
+                    <option value={30}>30 天內郵件</option>
+                  </select>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
