@@ -120,9 +120,19 @@ export const App: React.FC = () => {
     }
   });
 
+  const isPinnedRef = useRef(isPinned);
+  isPinnedRef.current = isPinned;
+
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+
+  const activePageRef = useRef(activePage);
+  activePageRef.current = activePage;
+
   const togglePin = useCallback(() => {
     setIsPinned((prev) => {
       const next = !prev;
+      isPinnedRef.current = next;
       try {
         localStorage.setItem("focusd-island-pinned", String(next));
       } catch {}
@@ -132,6 +142,7 @@ export const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    isPinnedRef.current = isPinned;
     invoke("set_island_pinned", { pinned: isPinned }).catch(() => {});
   }, [isPinned]);
 
@@ -190,11 +201,12 @@ export const App: React.FC = () => {
       margin_y: 0.0,
       expandedHeight: isExpanded ? 385 : 36,
       collapsedWidth: 300,
-      is_pinned: isPinned,
+      isPinned: isPinnedRef.current,
+      is_pinned: isPinnedRef.current,
     }).catch(() => {
       // 容錯（在非 Tauri 瀏覽器環境下忽略）
     });
-  }, [isPinned]);
+  }, []);
 
   // 初次掛載通知 Tauri 視窗就緒
   useEffect(() => {
@@ -370,11 +382,13 @@ export const App: React.FC = () => {
     }
     setActiveAlert(null);
     setMode("expanded");
+    modeRef.current = "expanded";
     syncInteraction("expanded");
   }, [syncInteraction]);
 
   const collapseIsland = useCallback(() => {
     setMode("collapsed");
+    modeRef.current = "collapsed";
     syncInteraction("collapsed");
   }, [syncInteraction]);
 
@@ -384,11 +398,15 @@ export const App: React.FC = () => {
     });
   }, []);
 
-  // 監聽原生島外點擊自動收合事件（未釘選狀態下點擊島外自動摺疊）
+  // 監聽原生島外點擊自動收合事件（未釘選且非暫存板分頁時，點擊島外自動摺疊）
   useEffect(() => {
     let unlisten: (() => void) | undefined;
     listen("auto-collapse-island", () => {
-      if (mode === "expanded" && !isPinned) {
+      if (
+        modeRef.current === "expanded" &&
+        !isPinnedRef.current &&
+        activePageRef.current !== "shelf"
+      ) {
         collapseIsland();
       }
     }).then((fn) => {
@@ -397,14 +415,23 @@ export const App: React.FC = () => {
     return () => {
       if (unlisten) unlisten();
     };
-  }, [mode, isPinned, collapseIsland]);
+  }, [collapseIsland]);
 
-  // 視窗失去焦點時（例如點擊其他全螢幕程式或桌面），若未釘選則自動收合
+  // 視窗失去焦點時（例如點擊其他全螢幕程式或桌面），若未釘選且非暫存板分頁則自動收合
   useEffect(() => {
     const handleWindowBlur = () => {
-      if (mode === "expanded" && !isPinned) {
+      if (
+        modeRef.current === "expanded" &&
+        !isPinnedRef.current &&
+        activePageRef.current !== "shelf"
+      ) {
         setTimeout(() => {
-          if (!document.hasFocus() && mode === "expanded" && !isPinned) {
+          if (
+            !document.hasFocus() &&
+            modeRef.current === "expanded" &&
+            !isPinnedRef.current &&
+            activePageRef.current !== "shelf"
+          ) {
             collapseIsland();
           }
         }, 120);
@@ -412,7 +439,7 @@ export const App: React.FC = () => {
     };
     window.addEventListener("blur", handleWindowBlur);
     return () => window.removeEventListener("blur", handleWindowBlur);
-  }, [mode, isPinned, collapseIsland]);
+  }, [collapseIsland]);
 
   // 全域鍵盤監聽：Tab / Shift+Tab 切換分頁，Esc 關閉/摺疊
   useEffect(() => {
@@ -773,7 +800,11 @@ export const App: React.FC = () => {
               <button
                 type="button"
                 className="action-icon-btn"
-                onClick={openSettings}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openSettings();
+                }}
+                onPointerDown={(e) => e.stopPropagation()}
                 title="開啟獨立設定視窗 (亦可點擊右鍵)"
               >
                 <Settings size={14} />
@@ -781,7 +812,11 @@ export const App: React.FC = () => {
               <button
                 type="button"
                 className={`action-icon-btn pin-btn ${isPinned ? "is-pinned" : ""}`}
-                onClick={togglePin}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  togglePin();
+                }}
+                onPointerDown={(e) => e.stopPropagation()}
                 title={
                   isPinned
                     ? "已釘選展開態（點擊島外不收合，點此取消釘選）"
