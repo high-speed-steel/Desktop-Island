@@ -2034,6 +2034,7 @@ pub fn run() {
             let _ = show_island(app);
         }))
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_drag::init())
         
         .on_window_event(|window, event| {
             if let WindowEvent::CloseRequested { api, .. } = event {

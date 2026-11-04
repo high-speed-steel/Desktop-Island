@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { openPath, revealItemInDir } from "@tauri-apps/plugin-opener";
+import { startDrag } from "@crabnebula/tauri-plugin-drag";
 import {
   FolderDown,
   File,
@@ -16,6 +17,7 @@ import {
   ExternalLink,
   FolderOpen,
   Plus,
+  GripVertical,
 } from "lucide-react";
 import "./FileShelfView.css";
 
@@ -86,7 +88,6 @@ export const FileShelfView: React.FC = () => {
           addedAt: nowStr,
         });
       } catch {
-        // Fallback 若原生呼叫失敗
         const name = path.split(/[/\\]/).pop() || path;
         newEntries.push({
           id: `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
@@ -100,14 +101,13 @@ export const FileShelfView: React.FC = () => {
     }
 
     setFiles((prev) => {
-      // 避免重複路徑，新加入的置頂
       const existingPaths = new Set(newEntries.map((e) => e.path));
       const filteredPrev = prev.filter((p) => !existingPaths.has(p.path));
       return [...newEntries, ...filteredPrev];
     });
   };
 
-  // 監聽 Tauri 原生拖放事件
+  // 監聽 Tauri 原生拖入事件
   useEffect(() => {
     let unlisten: (() => void) | undefined;
 
@@ -134,7 +134,6 @@ export const FileShelfView: React.FC = () => {
 
     setupListener();
 
-    // 同步監聽來自 App 頂層分發的檔案拖入事件
     const handleGlobalDrop = (e: CustomEvent<string[]>) => {
       if (e.detail && Array.isArray(e.detail)) {
         addFilePaths(e.detail);
@@ -147,6 +146,19 @@ export const FileShelfView: React.FC = () => {
       window.removeEventListener("focusd-shelf-add-files" as any, handleGlobalDrop);
     };
   }, []);
+
+  // 原生拖出（Drag Out）至桌面、檔案總管或其他應用
+  const handleDragOut = async (e: React.DragEvent, file: ShelfFile) => {
+    e.preventDefault();
+    try {
+      await startDrag({
+        item: [file.path],
+        icon: "",
+      });
+    } catch (err) {
+      console.error("拖出檔案失敗:", err);
+    }
+  };
 
   const handleCopyPath = async (e: React.MouseEvent, file: ShelfFile) => {
     e.stopPropagation();
@@ -192,7 +204,6 @@ export const FileShelfView: React.FC = () => {
     const paths: string[] = [];
     for (let i = 0; i < fileList.length; i++) {
       const f = fileList[i];
-      // 在桌面環境 File 物件可能包含 path 屬性
       const fullPath = (f as any).path || f.name;
       paths.push(fullPath);
     }
@@ -200,7 +211,6 @@ export const FileShelfView: React.FC = () => {
     e.target.value = "";
   };
 
-  // 根據副檔名取得對應圖示
   const getFileIcon = (file: ShelfFile) => {
     if (file.isDir) {
       return <Folder size={17} className="text-amber-400" />;
@@ -284,9 +294,11 @@ export const FileShelfView: React.FC = () => {
           <FolderDown size={22} className={isDragOver ? "text-cyan-400 animate-bounce" : "text-gray-400"} />
           <div className="dropzone-text-group">
             <span className="dropzone-text">
-              {isDragOver ? "放開滑鼠即可暫存檔案" : "將檔案直接拖入島內暫存，或點此選擇檔案"}
+              {isDragOver ? "放開滑鼠即可暫存檔案" : "拖曳檔案進來暫存 · 按住卡片隨時拖出至桌面或資料夾"}
             </span>
-            <span className="dropzone-sub">支援即時複製路徑、在檔案總管定位或直接點擊開啟</span>
+            <span className="dropzone-sub">
+              支援原生雙向拖曳：外部拖入收納、按住直接拖出放置至任意視窗
+            </span>
           </div>
         </div>
       </div>
@@ -297,7 +309,7 @@ export const FileShelfView: React.FC = () => {
             <FolderDown size={26} style={{ marginBottom: 8, opacity: 0.3 }} />
             <div>目前暫存板沒有任何檔案</div>
             <div className="shelf-empty-sub">
-              從桌面或檔案總管直接拖曳檔案進來，隨時暫存與隨取隨用
+              從桌面或檔案總管直接拖曳進來；暫存後按住卡片即可拖出放置至桌面或資料夾
             </div>
           </div>
         ) : (
@@ -308,9 +320,19 @@ export const FileShelfView: React.FC = () => {
               <div
                 key={file.id}
                 className="shelf-file-card"
+                draggable={true}
+                onDragStart={(e) => handleDragOut(e, file)}
                 onClick={() => handleOpenFile(file)}
-                title={`點擊直接開啟：${file.name}`}
+                title={`按住直接拖出至桌面/檔案總管；點擊直接開啟：${file.name}`}
               >
+                <div
+                  className="drag-grip"
+                  title="按住拖出此檔案"
+                  onDragStart={(e) => handleDragOut(e, file)}
+                >
+                  <GripVertical size={13} className="text-gray-500" />
+                </div>
+
                 <div className="file-icon-box">{getFileIcon(file)}</div>
 
                 <div className="file-details">

@@ -147,13 +147,33 @@
 .shelf-file-card {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 7px;
-  padding: 7px 9px;
-  cursor: pointer;
+  padding: 6px 8px;
+  cursor: grab;
   transition: all 0.18s ease;
+}
+
+.shelf-file-card:active {
+  cursor: grabbing;
+}
+
+.drag-grip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  padding: 0 1px;
+  opacity: 0.45;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.shelf-file-card:hover .drag-grip {
+  opacity: 0.9;
+  color: #22d3ee;
 }
 
 .shelf-file-card:hover {
