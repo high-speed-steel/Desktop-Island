@@ -2,6 +2,7 @@ pub mod core;
 pub mod modules;
 
 mod clipboard_history;
+mod mail;
 mod media_control;
 mod notifications;
 mod translation;
@@ -2059,6 +2060,49 @@ fn open_settings_window(app: AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+async fn fetch_emails(
+    accounts: Vec<mail::FetchMailAccountParams>,
+) -> Result<Vec<mail::FetchedEmailItem>, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut all_emails = Vec::new();
+        let mut last_error = None;
+
+        for account in accounts {
+            match mail::fetch_account_emails_sync(account) {
+                Ok(emails) => {
+                    all_emails.extend(emails);
+                }
+                Err(err) => {
+                    last_error = Some(err);
+                }
+            }
+        }
+
+        if all_emails.is_empty() {
+            if let Some(err) = last_error {
+                return Err(err);
+            }
+        }
+
+        Ok(all_emails)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+async fn test_mail_connection(
+    account: mail::FetchMailAccountParams,
+) -> Result<String, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let emails = mail::fetch_account_emails_sync(account)?;
+        Ok(format!("連線成功！共取得 {} 封近期郵件", emails.len()))
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
 // ==================== 結�? ====================
 
 pub fn run() {
@@ -2156,6 +2200,8 @@ pub fn run() {
             save_full_app_config,
             open_settings_window,
             get_file_info,
+            fetch_emails,
+            test_mail_connection,
             notifications::get_system_notifications,
             notifications::request_notification_permission,
             notifications::clear_system_notifications,

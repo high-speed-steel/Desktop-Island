@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Mail, Check, KeyRound, Copy, Settings, Inbox } from "lucide-react";
+import { Mail, Check, KeyRound, Copy, Settings, Inbox, RefreshCw, AlertCircle, Loader2 } from "lucide-react";
 import "./UnifiedMailView.css";
 
 export interface MailAccount {
@@ -47,6 +47,38 @@ export const UnifiedMailView: React.FC = () => {
 
   const [activeAccountId, setActiveAccountId] = useState<string>("all");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [emails, setEmails] = useState<EmailItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
+  // 取得有效啟用的帳號清單
+  const enabledAccounts = accounts.filter((a) => a.enabled);
+  const enabledAccountsRef = useRef(enabledAccounts);
+  enabledAccountsRef.current = enabledAccounts;
+
+  // 執行抓取信件
+  const handleFetchEmails = useCallback(async (showLoading = true) => {
+    const targets = enabledAccountsRef.current;
+    if (targets.length === 0) {
+      setEmails([]);
+      setFetchError(null);
+      return;
+    }
+
+    if (showLoading) setIsLoading(true);
+    setFetchError(null);
+
+    try {
+      const result = await invoke<EmailItem[]>("fetch_emails", {
+        accounts: targets,
+      });
+      setEmails(result);
+    } catch (err) {
+      setFetchError(String(err));
+    } finally {
+      if (showLoading) setIsLoading(false);
+    }
+  }, []);
 
   // 監聽獨立設定視窗發來的 storage 變更（及時同步自訂信箱帳號）
   useEffect(() => {
@@ -67,11 +99,18 @@ export const UnifiedMailView: React.FC = () => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // 取得有效啟用的帳號清單
-  const enabledAccounts = accounts.filter((a) => a.enabled);
+  // 帳號變更或首次掛載時自動拉取
+  useEffect(() => {
+    void handleFetchEmails(true);
+  }, [accounts, handleFetchEmails]);
 
-  // 信件清單（預設清空測試訊息）
-  const [emails] = useState<EmailItem[]>([]);
+  // 背景自動輪詢（每 60 秒定期刷新）
+  useEffect(() => {
+    const timer = setInterval(() => {
+      void handleFetchEmails(false);
+    }, 60000);
+    return () => clearInterval(timer);
+  }, [handleFetchEmails]);
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -124,6 +163,17 @@ export const UnifiedMailView: React.FC = () => {
             ))}
           </div>
 
+          {/* 手動重新整理按鈕 */}
+          <button
+            type="button"
+            className="config-mail-btn"
+            onClick={() => void handleFetchEmails(true)}
+            disabled={isLoading}
+            title={isLoading ? "正在同步中..." : "重新整理收件匣"}
+          >
+            <RefreshCw size={13} className={isLoading ? "mail-refresh-spin" : ""} />
+          </button>
+
           {/* 前往獨立設定視窗按鈕 */}
           <button
             type="button"
@@ -136,12 +186,36 @@ export const UnifiedMailView: React.FC = () => {
         </div>
       </div>
 
+      {/* 錯誤提示橫幅 */}
+      {fetchError && (
+        <div className="mail-error-banner">
+          <AlertCircle size={14} className="mail-error-icon" />
+          <span className="mail-error-msg">{fetchError}</span>
+          <button
+            type="button"
+            className="mail-error-action"
+            onClick={handleOpenSettings}
+          >
+            前往設定
+          </button>
+        </div>
+      )}
+
       {/* 信件流列表 */}
       <div className="mail-list">
-        {filteredEmails.length === 0 ? (
+        {isLoading && emails.length === 0 ? (
+          <div className="mail-empty">
+            <Loader2 size={28} className="mail-refresh-spin text-blue-400" opacity={0.7} />
+            <p>正在連線 IMAP 伺服器同步郵件中...</p>
+          </div>
+        ) : filteredEmails.length === 0 ? (
           <div className="mail-empty">
             <Inbox size={32} opacity={0.3} />
-            <p>此信箱目前沒有新郵件</p>
+            <p>
+              {enabledAccounts.length === 0
+                ? "尚未啟用任何信箱帳號，請前往設定新增或開啟信箱。"
+                : "此信箱目前沒有新郵件"}
+            </p>
           </div>
         ) : (
           filteredEmails.map((item) => {

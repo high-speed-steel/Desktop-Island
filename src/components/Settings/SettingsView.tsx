@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { Mail, Plus, Trash2, Edit2, Check, Save, RefreshCw } from 'lucide-react';
+import { Mail, Plus, Trash2, Edit2, Check, Save, RefreshCw, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { DynamicForm, type SchemaField } from './DynamicForm';
 import { PrioritySettings, type PriorityConfig } from './PrioritySettings';
 import {
@@ -83,6 +83,8 @@ export const SettingsView: React.FC = () => {
 
   // 新增 / 編輯信箱表單狀態
   const [isEditingAccount, setIsEditingAccount] = useState(false);
+  const [isTestingMail, setIsTestingMail] = useState(false);
+  const [mailTestStatus, setMailTestStatus] = useState<{ success: boolean; message: string } | null>(null);
   const [accountForm, setAccountForm] = useState<MailAccountConfig>({
     id: '',
     name: '',
@@ -280,12 +282,33 @@ export const SettingsView: React.FC = () => {
       color: '#3b82f6',
       enabled: true,
     });
+    setMailTestStatus(null);
     setIsEditingAccount(true);
   };
 
   const handleEditAccount = (acc: MailAccountConfig) => {
     setAccountForm({ ...acc });
+    setMailTestStatus(null);
     setIsEditingAccount(true);
+  };
+
+  const handleTestMailConnection = async () => {
+    if (!accountForm.email.trim() || !accountForm.imapHost.trim()) {
+      setMailTestStatus({ success: false, message: '請先輸入電子郵件與 IMAP 伺服器主機' });
+      return;
+    }
+    setIsTestingMail(true);
+    setMailTestStatus(null);
+    try {
+      const res = await invoke<string>('test_mail_connection', {
+        account: accountForm,
+      });
+      setMailTestStatus({ success: true, message: res });
+    } catch (err) {
+      setMailTestStatus({ success: false, message: String(err) });
+    } finally {
+      setIsTestingMail(false);
+    }
   };
 
   const handleDeleteAccount = (id: string) => {
@@ -551,7 +574,46 @@ export const SettingsView: React.FC = () => {
                   </div>
                 </div>
 
+                {mailTestStatus && (
+                  <div
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginBottom: '12px',
+                      backgroundColor: mailTestStatus.success ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                      color: mailTestStatus.success ? '#4ade80' : '#f87171',
+                      border: `1px solid ${mailTestStatus.success ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+                    }}
+                  >
+                    {mailTestStatus.success ? <CheckCircle2 size={14} /> : <AlertCircle size={14} />}
+                    <span>{mailTestStatus.message}</span>
+                  </div>
+                )}
+
                 <div className="form-actions-row">
+                  <button
+                    type="button"
+                    className="cancel-btn"
+                    onClick={() => void handleTestMailConnection()}
+                    disabled={isTestingMail}
+                    style={{ marginRight: 'auto' }}
+                  >
+                    {isTestingMail ? (
+                      <>
+                        <RefreshCw size={13} className="spin-icon" />
+                        <span>連線測試中...</span>
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw size={13} />
+                        <span>測試連線</span>
+                      </>
+                    )}
+                  </button>
                   <button
                     type="button"
                     className="cancel-btn"
