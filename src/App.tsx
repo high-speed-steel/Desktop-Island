@@ -36,7 +36,7 @@ export type IslandPage =
   | "translation";
 
 interface ActiveAlert {
-  type: "notification" | "mail";
+  type: "notification" | "mail" | "shelf";
   appName: string;
   title: string;
   body?: string;
@@ -505,21 +505,98 @@ export const App: React.FC = () => {
     };
     setupDragDrop();
 
-    // 監聽來自 Bot (HTTP POST) 推送的新檔案，自動展開島嶼並切換到暫存板
+    // 監聽來自 Bot (HTTP POST) 推送的新檔案：不強制展開靈動島，在收合狀態彈出提示「bot已收錄檔案至暫存板」，並在後台靜默寫入暫存板
     let unlistenRemote: (() => void) | undefined;
-    listen<string[]>("shelf:remote-files-added", (event) => {
-      if (Array.isArray(event.payload) && event.payload.length > 0) {
-        setMode("expanded");
-        syncInteraction("expanded");
-        setActivePage("shelf");
-        setTimeout(() => {
-          window.dispatchEvent(
-            new CustomEvent("focusd-shelf-add-files", {
-              detail: event.payload,
-            })
-          );
-        }, 120);
+    listen<string[]>("shelf:remote-files-added", async (event) => {
+      const paths = event.payload;
+      if (!Array.isArray(paths) || paths.length === 0) return;
+
+      // 1. 在背景靜默更新 localStorage 中的暫存板檔案清單
+      try {
+        const SHELF_STORAGE_KEY = "focusd-island-shelf-files";
+        const raw = localStorage.getItem(SHELF_STORAGE_KEY);
+        let existingFiles: any[] = [];
+        if (raw) {
+          try {
+            existingFiles = JSON.parse(raw);
+          } catch {}
+        }
+
+        const nowStr = new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+        const newEntries: any[] = [];
+        for (const p of paths) {
+          try {
+            const info = await invoke<any>("get_file_info", { path: p });
+            let children: any[] | undefined;
+            let childCount: number | undefined;
+
+            if (info.isDir) {
+              try {
+                const subFiles = await invoke<any[]>("get_dir_children", {
+                  path: info.path,
+                });
+                children = subFiles.map((c) => ({
+                  id: `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+                  name: c.name,
+                  path: c.path,
+                  size: c.sizeFormatted,
+                  isDir: c.isDir,
+                  addedAt: nowStr,
+                }));
+                childCount = children.length;
+              } catch (err) {
+                console.warn("無法取得資料夾內容:", err);
+              }
+            }
+
+            newEntries.push({
+              id: `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+              name: info.name,
+              path: info.path,
+              size: info.isDir ? `${childCount ?? 0} 個項目` : info.sizeFormatted,
+              isDir: info.isDir,
+              children,
+              childCount,
+              addedAt: nowStr,
+            });
+          } catch {
+            const name = p.split(/[/\\]/).pop() || p;
+            newEntries.push({
+              id: `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+              name,
+              path: p,
+              size: "檔案",
+              isDir: false,
+              addedAt: nowStr,
+            });
+          }
+        }
+
+        const existingPaths = new Set(newEntries.map((e) => e.path));
+        const merged = [...newEntries, ...existingFiles.filter((f) => !existingPaths.has(f.path))];
+        localStorage.setItem(SHELF_STORAGE_KEY, JSON.stringify(merged));
+      } catch (err) {
+        console.warn("靜默儲存暫存板檔案失敗:", err);
       }
+
+      // 2. 同步通知暫存板組件（若目前在暫存分頁或剛好開啟）
+      window.dispatchEvent(
+        new CustomEvent("focusd-shelf-add-files", {
+          detail: paths,
+        })
+      );
+
+      // 3. 觸發收合狀態膠囊上的提醒訊息，不自動展開
+      triggerAlert({
+        type: "shelf",
+        appName: "暫存板",
+        title: "bot已收錄檔案至暫存板",
+        targetPage: "shelf",
+      });
     }).then((un) => {
       unlistenRemote = un;
     });
@@ -709,12 +786,14 @@ export const App: React.FC = () => {
             </div>
           )}
 
-          {/* 左側插槽：通知時顯示鈴鐺/郵件，播放中顯示專輯封面，否則顯示去背白點 */}
+          {/* 左側插槽：通知時顯示鈴鐺/郵件/暫存板，播放中顯示專輯封面，否則顯示去背白點 */}
           <div className="capsule-icon-wrap">
             {activeAlert ? (
               <span className={`capsule-alert-icon ${activeAlert.type}`}>
                 {activeAlert.type === "mail" ? (
                   <Mail size={14} className="alert-icon-mail" />
+                ) : activeAlert.type === "shelf" ? (
+                  <FolderDown size={14} className="alert-icon-shelf" />
                 ) : (
                   <Bell size={14} className="alert-icon-bell" />
                 )}

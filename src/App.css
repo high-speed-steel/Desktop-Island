@@ -263,6 +263,11 @@ body, html {
   animation: alertIconShake 1.4s ease-in-out infinite;
 }
 
+.alert-icon-shelf {
+  color: #34d399;
+  animation: alertIconShake 1.4s ease-in-out infinite;
+}
+
 @keyframes alertIconShake {
   0%, 100% { transform: scale(1); }
   20% { transform: scale(1.15) rotate(-6deg); }
@@ -301,6 +306,12 @@ body, html {
   background: rgba(59, 130, 246, 0.2);
   color: #60a5fa;
   border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.ticker-alert-tag.shelf {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
 }
 
 .ticker-title.alert-title {
