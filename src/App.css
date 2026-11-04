@@ -908,37 +908,197 @@ body, html {
   color: #ef4444 !important;
 }
 
+/* --------------------------------------------------------------------------
+   7. 亮色主題全方位深色文字與高對比適配 (純白 pureWhite 與 白玻璃 whiteGlass)
+   -------------------------------------------------------------------------- */
+
+/* (1) 膠囊收合態與插斷通知文字 */
+.appearance-pureWhite .island-capsule.has-alert,
+.appearance-whiteGlass .island-capsule.has-alert,
+.appearance-classic .island-capsule.has-alert {
+  border-color: rgba(37, 99, 235, 0.45) !important;
+  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+.appearance-pureWhite .ticker-text,
+.appearance-whiteGlass .ticker-text,
+.appearance-classic .ticker-text,
+.appearance-pureWhite .ticker-title,
+.appearance-whiteGlass .ticker-title,
+.appearance-classic .ticker-title,
+.appearance-pureWhite .ticker-text.alert-text,
+.appearance-whiteGlass .ticker-text.alert-text,
+.appearance-classic .ticker-text.alert-text,
+.appearance-pureWhite .ticker-title.alert-title,
+.appearance-whiteGlass .ticker-title.alert-title,
+.appearance-classic .ticker-title.alert-title {
+  color: #111827 !important;
+}
+
+.appearance-pureWhite .ticker-time,
+.appearance-whiteGlass .ticker-time,
+.appearance-classic .ticker-time {
+  color: #374151 !important;
+}
+
+.appearance-pureWhite .ticker-alert-tag.notification,
+.appearance-whiteGlass .ticker-alert-tag.notification,
+.appearance-classic .ticker-alert-tag.notification {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #b45309 !important;
+  border-color: rgba(245, 158, 11, 0.45) !important;
+}
+
+.appearance-pureWhite .ticker-alert-tag.mail,
+.appearance-whiteGlass .ticker-alert-tag.mail,
+.appearance-classic .ticker-alert-tag.mail {
+  background: rgba(37, 99, 235, 0.15) !important;
+  color: #1d4ed8 !important;
+  border-color: rgba(37, 99, 235, 0.4) !important;
+}
+
+.appearance-pureWhite .ticker-alert-tag.shelf,
+.appearance-whiteGlass .ticker-alert-tag.shelf,
+.appearance-classic .ticker-alert-tag.shelf {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #047857 !important;
+  border-color: rgba(16, 185, 129, 0.45) !important;
+}
+
+.appearance-pureWhite .alert-icon-bell,
+.appearance-whiteGlass .alert-icon-bell,
+.appearance-classic .alert-icon-bell {
+  color: #d97706 !important;
+}
+
+.appearance-pureWhite .alert-icon-mail,
+.appearance-whiteGlass .alert-icon-mail,
+.appearance-classic .alert-icon-mail {
+  color: #2563eb !important;
+}
+
+.appearance-pureWhite .alert-icon-shelf,
+.appearance-whiteGlass .alert-icon-shelf,
+.appearance-classic .alert-icon-shelf {
+  color: #059669 !important;
+}
+
+/* (2) 各頁面通用卡片容器背景與邊框 */
+.appearance-pureWhite .section-card,
+.appearance-pureWhite .notif-card,
+.appearance-pureWhite .whitelist-panel,
+.appearance-pureWhite .clipboard-card,
+.appearance-pureWhite .todo-item,
+.appearance-pureWhite .mail-card,
+.appearance-pureWhite .shelf-file-card,
+.appearance-pureWhite .translate-result-card {
+  background: #f8fafc !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  color: #111827 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+}
+
 .appearance-whiteGlass .section-card,
+.appearance-whiteGlass .notif-card,
+.appearance-whiteGlass .whitelist-panel,
 .appearance-whiteGlass .clipboard-card,
 .appearance-whiteGlass .todo-item,
 .appearance-whiteGlass .mail-card,
-.appearance-whiteGlass .shelf-item,
-.appearance-whiteGlass .translate-box-source,
-.appearance-whiteGlass .translate-box-target,
+.appearance-whiteGlass .shelf-file-card,
+.appearance-whiteGlass .translate-result-card,
 .appearance-classic .section-card,
+.appearance-classic .notif-card,
+.appearance-classic .whitelist-panel,
 .appearance-classic .clipboard-card,
 .appearance-classic .todo-item,
 .appearance-classic .mail-card,
-.appearance-classic .shelf-item,
-.appearance-classic .translate-box-source,
-.appearance-classic .translate-box-target {
-  background: rgba(255, 255, 255, 0.32) !important;
-  border: 1px solid rgba(255, 255, 255, 0.55) !important;
-  color: #1f2937 !important;
+.appearance-classic .shelf-file-card,
+.appearance-classic .translate-result-card {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  color: #111827 !important;
   backdrop-filter: blur(14px) !important;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
 }
 
-/* 亮色主題通用文字深色適配 (純白 pureWhite 與 白玻璃 whiteGlass) */
+.appearance-pureWhite .notif-card:hover,
+.appearance-pureWhite .clipboard-card:hover,
+.appearance-pureWhite .todo-item:hover,
+.appearance-pureWhite .mail-card:hover,
+.appearance-pureWhite .shelf-file-card:hover,
+.appearance-whiteGlass .notif-card:hover,
+.appearance-whiteGlass .clipboard-card:hover,
+.appearance-whiteGlass .todo-item:hover,
+.appearance-whiteGlass .mail-card:hover,
+.appearance-whiteGlass .shelf-file-card:hover,
+.appearance-classic .notif-card:hover,
+.appearance-classic .clipboard-card:hover,
+.appearance-classic .todo-item:hover,
+.appearance-classic .mail-card:hover,
+.appearance-classic .shelf-file-card:hover {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(0, 0, 0, 0.18) !important;
+}
+
+/* (3) 主標題與主要內文一律強制深色 (#111827) */
 .appearance-pureWhite .track-title-large,
 .appearance-whiteGlass .track-title-large,
-.appearance-classic .track-title-large {
+.appearance-classic .track-title-large,
+.appearance-pureWhite .stat-pill-value,
+.appearance-whiteGlass .stat-pill-value,
+.appearance-classic .stat-pill-value,
+.appearance-pureWhite .notif-title,
+.appearance-whiteGlass .notif-title,
+.appearance-classic .notif-title,
+.appearance-pureWhite .notif-item-title,
+.appearance-whiteGlass .notif-item-title,
+.appearance-classic .notif-item-title,
+.appearance-pureWhite .switch-label,
+.appearance-whiteGlass .switch-label,
+.appearance-classic .switch-label,
+.appearance-pureWhite .section-title,
+.appearance-whiteGlass .section-title,
+.appearance-classic .section-title,
+.appearance-pureWhite .clipboard-card-text,
+.appearance-whiteGlass .clipboard-card-text,
+.appearance-classic .clipboard-card-text,
+.appearance-pureWhite .mail-title,
+.appearance-whiteGlass .mail-title,
+.appearance-classic .mail-title,
+.appearance-pureWhite .mail-subject,
+.appearance-whiteGlass .mail-subject,
+.appearance-classic .mail-subject,
+.appearance-pureWhite .shelf-title,
+.appearance-whiteGlass .shelf-title,
+.appearance-classic .shelf-title,
+.appearance-pureWhite .file-name,
+.appearance-whiteGlass .file-name,
+.appearance-classic .file-name,
+.appearance-pureWhite .dropzone-text,
+.appearance-whiteGlass .dropzone-text,
+.appearance-classic .dropzone-text,
+.appearance-pureWhite .subfile-name,
+.appearance-whiteGlass .subfile-name,
+.appearance-classic .subfile-name,
+.appearance-pureWhite .todo-text,
+.appearance-whiteGlass .todo-text,
+.appearance-classic .todo-text,
+.appearance-pureWhite .translate-title,
+.appearance-whiteGlass .translate-title,
+.appearance-classic .translate-title,
+.appearance-pureWhite .result-content,
+.appearance-whiteGlass .result-content,
+.appearance-classic .result-content {
   color: #111827 !important;
 }
 
+/* (4) 次要文字、副標題、時間戳與輔助說明強制深灰 (#4b5563) */
 .appearance-pureWhite .track-artist-large,
 .appearance-whiteGlass .track-artist-large,
 .appearance-classic .track-artist-large,
+.appearance-pureWhite .time-text,
+.appearance-whiteGlass .time-text,
+.appearance-classic .time-text,
 .appearance-pureWhite .time-label,
 .appearance-whiteGlass .time-label,
 .appearance-classic .time-label,
@@ -947,24 +1107,463 @@ body, html {
 .appearance-classic .stat-pill-name,
 .appearance-pureWhite .stat-card-title,
 .appearance-whiteGlass .stat-card-title,
-.appearance-classic .stat-card-title {
+.appearance-classic .stat-card-title,
+.appearance-pureWhite .notif-item-body,
+.appearance-whiteGlass .notif-item-body,
+.appearance-classic .notif-item-body,
+.appearance-pureWhite .notif-time,
+.appearance-whiteGlass .notif-time,
+.appearance-classic .notif-time,
+.appearance-pureWhite .panel-hint,
+.appearance-whiteGlass .panel-hint,
+.appearance-classic .panel-hint,
+.appearance-pureWhite .apps-empty-hint,
+.appearance-whiteGlass .apps-empty-hint,
+.appearance-classic .apps-empty-hint,
+.appearance-pureWhite .banner-desc,
+.appearance-whiteGlass .banner-desc,
+.appearance-classic .banner-desc,
+.appearance-pureWhite .notif-empty,
+.appearance-whiteGlass .notif-empty,
+.appearance-classic .notif-empty,
+.appearance-pureWhite .clipboard-card-meta,
+.appearance-whiteGlass .clipboard-card-meta,
+.appearance-classic .clipboard-card-meta,
+.appearance-pureWhite .clipboard-image-meta,
+.appearance-whiteGlass .clipboard-image-meta,
+.appearance-classic .clipboard-image-meta,
+.appearance-pureWhite .clipboard-empty,
+.appearance-whiteGlass .clipboard-empty,
+.appearance-classic .clipboard-empty,
+.appearance-pureWhite .mail-sender,
+.appearance-whiteGlass .mail-sender,
+.appearance-classic .mail-sender,
+.appearance-pureWhite .mail-date,
+.appearance-whiteGlass .mail-date,
+.appearance-classic .mail-date,
+.appearance-pureWhite .mail-snippet,
+.appearance-whiteGlass .mail-snippet,
+.appearance-classic .mail-snippet,
+.appearance-pureWhite .mail-empty,
+.appearance-whiteGlass .mail-empty,
+.appearance-classic .mail-empty,
+.appearance-pureWhite .dropzone-sub,
+.appearance-whiteGlass .dropzone-sub,
+.appearance-classic .dropzone-sub,
+.appearance-pureWhite .file-meta,
+.appearance-whiteGlass .file-meta,
+.appearance-classic .file-meta,
+.appearance-pureWhite .subfile-size,
+.appearance-whiteGlass .subfile-size,
+.appearance-classic .subfile-size,
+.appearance-pureWhite .folder-drag-hint,
+.appearance-whiteGlass .folder-drag-hint,
+.appearance-classic .folder-drag-hint,
+.appearance-pureWhite .shelf-empty,
+.appearance-whiteGlass .shelf-empty,
+.appearance-classic .shelf-empty,
+.appearance-pureWhite .todo-empty,
+.appearance-whiteGlass .todo-empty,
+.appearance-classic .todo-empty,
+.appearance-pureWhite .result-label,
+.appearance-whiteGlass .result-label,
+.appearance-classic .result-label {
   color: #4b5563 !important;
 }
 
+/* (5) 輸入框、搜尋欄與按鈕在亮色背景下的深色字與邊框 */
+.appearance-pureWhite .clipboard-search-bar,
+.appearance-pureWhite .todo-input,
+.appearance-pureWhite .custom-app-input,
+.appearance-pureWhite .translate-input,
+.appearance-whiteGlass .clipboard-search-bar,
+.appearance-whiteGlass .todo-input,
+.appearance-whiteGlass .custom-app-input,
+.appearance-whiteGlass .translate-input,
+.appearance-classic .clipboard-search-bar,
+.appearance-classic .todo-input,
+.appearance-classic .custom-app-input,
+.appearance-classic .translate-input {
+  background: rgba(255, 255, 255, 0.78) !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  color: #111827 !important;
+}
+
+.appearance-pureWhite .clipboard-search-input,
+.appearance-whiteGlass .clipboard-search-input,
+.appearance-classic .clipboard-search-input {
+  color: #111827 !important;
+}
+
+.appearance-pureWhite .clipboard-search-input::placeholder,
+.appearance-pureWhite .todo-input::placeholder,
+.appearance-pureWhite .custom-app-input::placeholder,
+.appearance-pureWhite .translate-input::placeholder,
+.appearance-whiteGlass .clipboard-search-input::placeholder,
+.appearance-whiteGlass .todo-input::placeholder,
+.appearance-whiteGlass .custom-app-input::placeholder,
+.appearance-whiteGlass .translate-input::placeholder,
+.appearance-classic .clipboard-search-input::placeholder,
+.appearance-classic .todo-input::placeholder,
+.appearance-classic .custom-app-input::placeholder,
+.appearance-classic .translate-input::placeholder {
+  color: #6b7280 !important;
+}
+
+/* 一般操作按鈕、控制鈕與小圖示按鈕 */
+.appearance-pureWhite .ctrl-btn-large:not(.main-ctrl-large),
+.appearance-pureWhite .action-pill-btn,
+.appearance-pureWhite .app-chip,
+.appearance-pureWhite .banner-secondary-btn,
+.appearance-pureWhite .clipboard-copy-btn,
+.appearance-pureWhite .clipboard-delete-btn,
+.appearance-pureWhite .config-mail-btn,
+.appearance-pureWhite .action-btn,
+.appearance-pureWhite .todo-add-btn,
+.appearance-whiteGlass .ctrl-btn-large:not(.main-ctrl-large),
+.appearance-whiteGlass .action-pill-btn,
+.appearance-whiteGlass .app-chip,
+.appearance-whiteGlass .banner-secondary-btn,
+.appearance-whiteGlass .clipboard-copy-btn,
+.appearance-whiteGlass .clipboard-delete-btn,
+.appearance-whiteGlass .config-mail-btn,
+.appearance-whiteGlass .action-btn,
+.appearance-whiteGlass .todo-add-btn,
+.appearance-classic .ctrl-btn-large:not(.main-ctrl-large),
+.appearance-classic .action-pill-btn,
+.appearance-classic .app-chip,
+.appearance-classic .banner-secondary-btn,
+.appearance-classic .clipboard-copy-btn,
+.appearance-classic .clipboard-delete-btn,
+.appearance-classic .config-mail-btn,
+.appearance-classic .action-btn,
+.appearance-classic .todo-add-btn {
+  background: rgba(0, 0, 0, 0.06) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  color: #1f2937 !important;
+}
+
+.appearance-pureWhite .ctrl-btn-large:not(.main-ctrl-large):hover,
+.appearance-pureWhite .action-pill-btn:hover,
+.appearance-pureWhite .app-chip:hover,
+.appearance-pureWhite .clipboard-copy-btn:hover,
+.appearance-pureWhite .config-mail-btn:hover,
+.appearance-pureWhite .action-btn:hover,
+.appearance-pureWhite .todo-add-btn:hover,
+.appearance-whiteGlass .ctrl-btn-large:not(.main-ctrl-large):hover,
+.appearance-whiteGlass .action-pill-btn:hover,
+.appearance-whiteGlass .app-chip:hover,
+.appearance-whiteGlass .clipboard-copy-btn:hover,
+.appearance-whiteGlass .config-mail-btn:hover,
+.appearance-whiteGlass .action-btn:hover,
+.appearance-whiteGlass .todo-add-btn:hover,
+.appearance-classic .ctrl-btn-large:not(.main-ctrl-large):hover,
+.appearance-classic .action-pill-btn:hover,
+.appearance-classic .app-chip:hover,
+.appearance-classic .clipboard-copy-btn:hover,
+.appearance-classic .config-mail-btn:hover,
+.appearance-classic .action-btn:hover,
+.appearance-classic .todo-add-btn:hover {
+  background: rgba(0, 0, 0, 0.12) !important;
+  color: #000000 !important;
+}
+
+/* (6) 系統監控、音樂進度條與信箱篩選器 */
+.appearance-pureWhite .progress-track-bg,
+.appearance-whiteGlass .progress-track-bg,
+.appearance-classic .progress-track-bg,
 .appearance-pureWhite .progress-track,
 .appearance-whiteGlass .progress-track,
 .appearance-classic .progress-track,
 .appearance-pureWhite .stat-progress-bar,
 .appearance-whiteGlass .stat-progress-bar,
 .appearance-classic .stat-progress-bar {
-  background: rgba(0, 0, 0, 0.08) !important;
+  background: rgba(0, 0, 0, 0.1) !important;
 }
 
+.appearance-pureWhite .stat-pill,
+.appearance-whiteGlass .stat-pill,
+.appearance-classic .stat-pill,
 .appearance-pureWhite .stat-pill-compact,
 .appearance-whiteGlass .stat-pill-compact,
 .appearance-classic .stat-pill-compact {
-  background: rgba(255, 255, 255, 0.6) !important;
+  background: rgba(255, 255, 255, 0.65) !important;
   border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.appearance-pureWhite .cpu-color,
+.appearance-whiteGlass .cpu-color { color: #0284c7 !important; }
+.appearance-pureWhite .gpu-color,
+.appearance-whiteGlass .gpu-color { color: #7e22ce !important; }
+.appearance-pureWhite .ram-color,
+.appearance-whiteGlass .ram-color { color: #d97706 !important; }
+.appearance-pureWhite .net-color,
+.appearance-whiteGlass .net-color { color: #059669 !important; }
+
+/* 信箱與通知標籤深色化 */
+.appearance-pureWhite .account-filter-tabs,
+.appearance-whiteGlass .account-filter-tabs,
+.appearance-classic .account-filter-tabs {
+  background: rgba(0, 0, 0, 0.06) !important;
+}
+
+.appearance-pureWhite .filter-tab,
+.appearance-whiteGlass .filter-tab,
+.appearance-classic .filter-tab {
+  color: #4b5563 !important;
+}
+
+.appearance-pureWhite .filter-tab:hover,
+.appearance-whiteGlass .filter-tab:hover,
+.appearance-classic .filter-tab:hover {
+  color: #111827 !important;
+  background: rgba(0, 0, 0, 0.06) !important;
+}
+
+.appearance-pureWhite .filter-tab.active,
+.appearance-whiteGlass .filter-tab.active,
+.appearance-classic .filter-tab.active {
+  background: #ffffff !important;
+  color: #111827 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.appearance-pureWhite .verification-code-box,
+.appearance-whiteGlass .verification-code-box,
+.appearance-classic .verification-code-box {
+  background: rgba(245, 158, 11, 0.15) !important;
+  border-color: rgba(217, 119, 6, 0.4) !important;
+}
+
+.appearance-pureWhite .code-label,
+.appearance-whiteGlass .code-label,
+.appearance-classic .code-label {
+  color: #92400e !important;
+}
+
+.appearance-pureWhite .code-value,
+.appearance-whiteGlass .code-value,
+.appearance-classic .code-value {
+  color: #78350f !important;
+}
+
+/* (7) 暫存板 (Shelf) 專屬元件與手風琴資料夾深色字適配 */
+.appearance-pureWhite .shelf-count,
+.appearance-whiteGlass .shelf-count,
+.appearance-classic .shelf-count,
+.appearance-pureWhite .shelf-add-btn,
+.appearance-whiteGlass .shelf-add-btn,
+.appearance-classic .shelf-add-btn {
+  background: rgba(8, 145, 178, 0.15) !important;
+  color: #0e7490 !important;
+  border-color: rgba(8, 145, 178, 0.35) !important;
+}
+
+.appearance-pureWhite .dropzone-border,
+.appearance-whiteGlass .dropzone-border,
+.appearance-classic .dropzone-border {
+  border-color: rgba(0, 0, 0, 0.2) !important;
+  background: rgba(255, 255, 255, 0.45) !important;
+}
+
+.appearance-pureWhite .file-icon-box,
+.appearance-whiteGlass .file-icon-box,
+.appearance-classic .file-icon-box {
+  background: rgba(0, 0, 0, 0.06) !important;
+}
+
+.appearance-pureWhite .folder-title-name,
+.appearance-whiteGlass .folder-title-name,
+.appearance-classic .folder-title-name,
+.appearance-pureWhite .folder-left-name,
+.appearance-whiteGlass .folder-left-name,
+.appearance-classic .folder-left-name {
+  color: #92400e !important;
+}
+
+.appearance-pureWhite .folder-count-pill,
+.appearance-whiteGlass .folder-count-pill,
+.appearance-classic .folder-count-pill,
+.appearance-pureWhite .folder-left-count,
+.appearance-whiteGlass .folder-left-count,
+.appearance-classic .folder-left-count,
+.appearance-pureWhite .file-click-hint,
+.appearance-whiteGlass .file-click-hint,
+.appearance-classic .file-click-hint {
+  color: #b45309 !important;
+}
+
+.appearance-pureWhite .shelf-folder-card.is-expanded,
+.appearance-whiteGlass .shelf-folder-card.is-expanded,
+.appearance-classic .shelf-folder-card.is-expanded {
+  background: rgba(254, 243, 199, 0.55) !important;
+  border-color: rgba(217, 119, 6, 0.4) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+}
+
+.appearance-pureWhite .folder-left-col,
+.appearance-whiteGlass .folder-left-col,
+.appearance-classic .folder-left-col {
+  border-right-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.appearance-pureWhite .folder-actions-col,
+.appearance-whiteGlass .folder-actions-col,
+.appearance-classic .folder-actions-col {
+  border-left-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.appearance-pureWhite .folder-subfile-item,
+.appearance-whiteGlass .folder-subfile-item,
+.appearance-classic .folder-subfile-item {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  color: #111827 !important;
+}
+
+.appearance-pureWhite .folder-subfile-item:hover,
+.appearance-whiteGlass .folder-subfile-item:hover,
+.appearance-classic .folder-subfile-item:hover {
+  background: rgba(8, 145, 178, 0.15) !important;
+  border-color: rgba(8, 145, 178, 0.4) !important;
+  color: #0f172a !important;
+}
+
+/* (8) 其它徽章、分隔線、核取方塊與翻譯按鈕深色適配 */
+.appearance-pureWhite .notif-header,
+.appearance-whiteGlass .notif-header,
+.appearance-classic .notif-header,
+.appearance-pureWhite .mail-header,
+.appearance-whiteGlass .mail-header,
+.appearance-classic .mail-header,
+.appearance-pureWhite .shelf-header,
+.appearance-whiteGlass .shelf-header,
+.appearance-classic .shelf-header,
+.appearance-pureWhite .translate-header,
+.appearance-whiteGlass .translate-header,
+.appearance-classic .translate-header {
+  border-bottom-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.appearance-pureWhite .todo-checkbox:not(.checked),
+.appearance-whiteGlass .todo-checkbox:not(.checked),
+.appearance-classic .todo-checkbox:not(.checked) {
+  border-color: rgba(0, 0, 0, 0.35) !important;
+}
+
+.appearance-pureWhite .translate-btn,
+.appearance-whiteGlass .translate-btn,
+.appearance-classic .translate-btn {
+  background: rgba(79, 70, 229, 0.15) !important;
+  border-color: rgba(79, 70, 229, 0.4) !important;
+  color: #3730a3 !important;
+}
+
+.appearance-pureWhite .translate-btn:hover:not(:disabled),
+.appearance-whiteGlass .translate-btn:hover:not(:disabled),
+.appearance-classic .translate-btn:hover:not(:disabled) {
+  background: rgba(79, 70, 229, 0.25) !important;
+  color: #1e1b4b !important;
+}
+
+.appearance-pureWhite .lang-tag,
+.appearance-whiteGlass .lang-tag,
+.appearance-classic .lang-tag,
+.appearance-pureWhite .copy-result-btn,
+.appearance-whiteGlass .copy-result-btn,
+.appearance-classic .copy-result-btn {
+  color: #4338ca !important;
+}
+
+.appearance-pureWhite .badge-text,
+.appearance-whiteGlass .badge-text,
+.appearance-classic .badge-text {
+  background: rgba(0, 0, 0, 0.08) !important;
+  color: #374151 !important;
+}
+
+.appearance-pureWhite .badge-code,
+.appearance-whiteGlass .badge-code,
+.appearance-classic .badge-code {
+  background: rgba(147, 51, 234, 0.14) !important;
+  color: #6b21a8 !important;
+}
+
+.appearance-pureWhite .badge-link,
+.appearance-whiteGlass .badge-link,
+.appearance-classic .badge-link,
+.appearance-pureWhite .source-badge,
+.appearance-whiteGlass .source-badge,
+.appearance-classic .source-badge,
+.appearance-pureWhite .mail-sync-badge,
+.appearance-whiteGlass .mail-sync-badge,
+.appearance-classic .mail-sync-badge {
+  background: rgba(37, 99, 235, 0.14) !important;
+  color: #1d4ed8 !important;
+}
+
+.appearance-pureWhite .badge-image,
+.appearance-whiteGlass .badge-image,
+.appearance-classic .badge-image,
+.appearance-pureWhite .whitelist-active-pill,
+.appearance-whiteGlass .whitelist-active-pill,
+.appearance-classic .whitelist-active-pill,
+.appearance-pureWhite .app-chip.chip-whitelisted,
+.appearance-whiteGlass .app-chip.chip-whitelisted,
+.appearance-classic .app-chip.chip-whitelisted {
+  background: rgba(16, 185, 129, 0.16) !important;
+  color: #047857 !important;
+}
+
+.appearance-pureWhite .notif-count,
+.appearance-whiteGlass .notif-count,
+.appearance-classic .notif-count,
+.appearance-pureWhite .banner-title,
+.appearance-whiteGlass .banner-title,
+.appearance-classic .banner-title,
+.appearance-pureWhite .banner-primary-btn,
+.appearance-whiteGlass .banner-primary-btn,
+.appearance-classic .banner-primary-btn {
+  color: #b45309 !important;
+}
+
+.appearance-pureWhite .clear-btn,
+.appearance-whiteGlass .clear-btn,
+.appearance-classic .clear-btn,
+.appearance-pureWhite .clipboard-clear-btn,
+.appearance-whiteGlass .clipboard-clear-btn,
+.appearance-classic .clipboard-clear-btn,
+.appearance-pureWhite .shelf-clear-btn,
+.appearance-whiteGlass .shelf-clear-btn,
+.appearance-classic .shelf-clear-btn {
+  color: #dc2626 !important;
+  border-color: rgba(220, 38, 38, 0.3) !important;
+}
+
+.appearance-pureWhite .json-path-footer,
+.appearance-whiteGlass .json-path-footer,
+.appearance-classic .json-path-footer {
+  background: rgba(0, 0, 0, 0.05) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.appearance-pureWhite .json-path-footer .path-text,
+.appearance-whiteGlass .json-path-footer .path-text,
+.appearance-classic .json-path-footer .path-text {
+  color: #374151 !important;
+}
+
+.appearance-pureWhite .json-path-footer .open-icon,
+.appearance-whiteGlass .json-path-footer .open-icon,
+.appearance-classic .json-path-footer .open-icon {
+  color: #0891b2 !important;
+}
+
+/* 捲軸深色化 */
+.appearance-pureWhite ::-webkit-scrollbar-thumb,
+.appearance-whiteGlass ::-webkit-scrollbar-thumb,
+.appearance-classic ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.22) !important;
 }
 
 /* 懸浮脫離頂部時的主題邊框與立體陰影增強 */
