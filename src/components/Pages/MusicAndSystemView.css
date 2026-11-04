@@ -13,9 +13,11 @@
 
 /* 擴大後的音樂卡片區塊 */
 .music-section-expanded {
+  flex: 1;
   padding: 16px 18px 14px 18px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 14px;
 }
 
