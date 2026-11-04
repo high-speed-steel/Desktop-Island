@@ -188,8 +188,18 @@ fn monitor_loop(service: Arc<NotificationService>) {
         };
 
         let mut changed = false;
+        let mut newly_added_item: Option<SystemNotificationItem> = None;
         if let Ok(mut current) = service.state.lock() {
             if current.status != status || current.error != error || current.items != filtered_items {
+                // 初次啟動不彈出歷史舊通知，僅在已有快照狀態下比對新增通知
+                if !current.items.is_empty() {
+                    for item in &filtered_items {
+                        if !current.items.iter().any(|old| old.id == item.id) {
+                            newly_added_item = Some(item.clone());
+                            break;
+                        }
+                    }
+                }
                 current.status = status;
                 current.error = error;
                 current.items = filtered_items;
@@ -199,6 +209,9 @@ fn monitor_loop(service: Arc<NotificationService>) {
 
         if changed {
             let _ = service.app.emit(NOTIFICATIONS_CHANGED_EVENT, ());
+            if let Some(new_item) = newly_added_item {
+                let _ = service.app.emit("new-system-notification", new_item);
+            }
         }
 
         thread::sleep(Duration::from_millis(1500));

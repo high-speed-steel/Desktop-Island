@@ -35,6 +35,14 @@ export type IslandPage =
   | "todo"
   | "translation";
 
+interface ActiveAlert {
+  type: "notification" | "mail";
+  appName: string;
+  title: string;
+  body?: string;
+  targetPage: IslandPage;
+}
+
 interface MediaState {
   available: boolean;
   playbackStatus: string;
@@ -208,6 +216,159 @@ export const App: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // 膠囊收合態瞬時插斷通知狀態（收到新通知/郵件時暫時跳離音樂，停留設定時間後自動返回）
+  const [activeAlert, setActiveAlert] = useState<ActiveAlert | null>(null);
+  const alertTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const seenNotificationIdsRef = useRef<Set<string>>(new Set());
+  const isInitialNotificationLoadRef = useRef(true);
+  const seenEmailIdsRef = useRef<Set<string>>(new Set());
+  const isInitialMailLoadRef = useRef(true);
+
+  const triggerAlert = useCallback((alert: ActiveAlert) => {
+    // 讀取設定中的停留秒數（預設 5 秒）
+    let durationSec = 5;
+    try {
+      const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (typeof parsed.notificationDurationSec === "number" && parsed.notificationDurationSec > 0) {
+          durationSec = parsed.notificationDurationSec;
+        }
+      }
+    } catch {}
+
+    setActiveAlert(alert);
+
+    if (alertTimerRef.current) {
+      clearTimeout(alertTimerRef.current);
+    }
+
+    alertTimerRef.current = setTimeout(() => {
+      setActiveAlert(null);
+      alertTimerRef.current = null;
+    }, durationSec * 1000);
+  }, []);
+
+  // 監聽系統通知推播與設定測試事件
+  useEffect(() => {
+    let unlistenNew: (() => void) | undefined;
+    let unlistenChanged: (() => void) | undefined;
+    let unlistenTest: (() => void) | undefined;
+
+    // 1. 初次載入記住當前現有通知 ID，避免剛啟動時誤跳出歷史通知
+    invoke<any>("get_system_notifications")
+      .then((res) => {
+        if (res && Array.isArray(res.items)) {
+          res.items.forEach((it: any) => seenNotificationIdsRef.current.add(it.id));
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        isInitialNotificationLoadRef.current = false;
+      });
+
+    // 2. 監聽 Rust 原生即時推播之新增通知事件
+    listen<any>("new-system-notification", (event) => {
+      const item = event.payload;
+      if (item && (item.title || item.appName)) {
+        seenNotificationIdsRef.current.add(item.id);
+        triggerAlert({
+          type: "notification",
+          appName: item.appName || "系統通知",
+          title: item.title || item.body || "新通知",
+          body: item.body,
+          targetPage: "notifications",
+        });
+      }
+    }).then((fn) => {
+      unlistenNew = fn;
+    });
+
+    // 3. 監聽系統通知變更事件（作為多重備援比對機制）
+    listen("system-notifications-changed", async () => {
+      try {
+        const res = await invoke<any>("get_system_notifications");
+        if (res && Array.isArray(res.items)) {
+          if (isInitialNotificationLoadRef.current) {
+            res.items.forEach((it: any) => seenNotificationIdsRef.current.add(it.id));
+            isInitialNotificationLoadRef.current = false;
+            return;
+          }
+          for (const it of res.items) {
+            if (!seenNotificationIdsRef.current.has(it.id)) {
+              seenNotificationIdsRef.current.add(it.id);
+              triggerAlert({
+                type: "notification",
+                appName: it.appName || "系統通知",
+                title: it.title || it.body || "新通知",
+                body: it.body,
+                targetPage: "notifications",
+              });
+              break;
+            }
+          }
+        }
+      } catch {}
+    }).then((fn) => {
+      unlistenChanged = fn;
+    });
+
+    // 4. 監聽手動/測試跳轉事件（自設定視窗或廣播發出）
+    listen<any>("trigger-island-alert", (event) => {
+      if (event.payload) {
+        triggerAlert(event.payload);
+      }
+    }).then((fn) => {
+      unlistenTest = fn;
+    });
+
+    return () => {
+      if (unlistenNew) unlistenNew();
+      if (unlistenChanged) unlistenChanged();
+      if (unlistenTest) unlistenTest();
+    };
+  }, [triggerAlert]);
+
+  // 背景定時檢查多信箱帳號新郵件（每 30 秒輪詢）
+  useEffect(() => {
+    const checkNewEmails = async () => {
+      try {
+        const raw = localStorage.getItem("focusd-island-mail-accounts");
+        if (!raw) return;
+        const accounts = JSON.parse(raw);
+        if (!Array.isArray(accounts)) return;
+        const enabledAccounts = accounts.filter((a: any) => a.enabled);
+        if (enabledAccounts.length === 0) return;
+
+        const emails = await invoke<any[]>("fetch_emails", { accounts: enabledAccounts });
+        if (Array.isArray(emails)) {
+          if (isInitialMailLoadRef.current) {
+            emails.forEach((m) => seenEmailIdsRef.current.add(m.id));
+            isInitialMailLoadRef.current = false;
+            return;
+          }
+          for (const m of emails) {
+            if (!seenEmailIdsRef.current.has(m.id)) {
+              seenEmailIdsRef.current.add(m.id);
+              triggerAlert({
+                type: "mail",
+                appName: m.accountName || "新郵件",
+                title: m.subject || "無主旨",
+                body: m.sender,
+                targetPage: "mail",
+              });
+              break;
+            }
+          }
+        }
+      } catch {}
+    };
+
+    checkNewEmails();
+    const mailTimer = setInterval(checkNewEmails, 30000);
+    return () => clearInterval(mailTimer);
+  }, [triggerAlert]);
+
   const handleMediaPlayPause = () => {
     invoke("media_play_pause").catch(() => {
       setMediaState((prev) => ({
@@ -226,6 +387,11 @@ export const App: React.FC = () => {
   };
 
   const expandIsland = useCallback(() => {
+    if (alertTimerRef.current) {
+      clearTimeout(alertTimerRef.current);
+      alertTimerRef.current = null;
+    }
+    setActiveAlert(null);
     setMode("expanded");
     syncInteraction("expanded");
   }, [syncInteraction]);
@@ -416,6 +582,9 @@ export const App: React.FC = () => {
       didDragRef.current = false;
       return;
     }
+    if (activeAlert) {
+      setActivePage(activeAlert.targetPage);
+    }
     expandIsland();
   };
 
@@ -492,7 +661,7 @@ export const App: React.FC = () => {
       {/* 膠囊摺疊態 (Collapsed Capsule) - 支援橫向拖曳、拖出螢幕邊界、迷你專輯封面與動態音訊波浪 */}
       {mode === "collapsed" && (
         <div
-          className={`island-capsule ${isDetached ? "detached" : ""}`}
+          className={`island-capsule ${isDetached ? "detached" : ""} ${activeAlert ? "has-alert" : ""}`}
           onClick={handleCapsuleClick}
           onDoubleClick={handleCapsuleDoubleClick}
           onPointerDown={handleCapsulePointerDown}
@@ -500,7 +669,9 @@ export const App: React.FC = () => {
           onPointerUp={handleCapsulePointerUp}
           onPointerCancel={handleCapsulePointerUp}
           title={
-            isDetached
+            activeAlert
+              ? `點擊展開查看${activeAlert.type === "mail" ? "信件" : "通知"}`
+              : isDetached
               ? "按住可隨意拖曳，雙擊復位頂部中央，點擊展開面板"
               : "按住可橫向移動或拖離螢幕頂端，點擊展開面板，按右鍵開啟設定"
           }
@@ -513,9 +684,17 @@ export const App: React.FC = () => {
             </div>
           )}
 
-          {/* 左側插槽：播放中且有封面顯示微型專輯圖，否則顯示專屬去背白點 */}
+          {/* 左側插槽：通知時顯示鈴鐺/郵件，播放中顯示專輯封面，否則顯示去背白點 */}
           <div className="capsule-icon-wrap">
-            {mediaState.thumbnail && mediaState.playbackStatus === "playing" ? (
+            {activeAlert ? (
+              <span className={`capsule-alert-icon ${activeAlert.type}`}>
+                {activeAlert.type === "mail" ? (
+                  <Mail size={14} className="alert-icon-mail" />
+                ) : (
+                  <Bell size={14} className="alert-icon-bell" />
+                )}
+              </span>
+            ) : mediaState.thumbnail && mediaState.playbackStatus === "playing" ? (
               <img
                 src={mediaState.thumbnail}
                 alt="Mini Album"
@@ -526,24 +705,39 @@ export const App: React.FC = () => {
             )}
           </div>
 
-          {/* 膠囊動態資訊：常駐播放與系統資訊，後綴即時時間 (| hh : mm) */}
+          {/* 膠囊動態資訊：通知時顯示標籤與標題，平時顯示音樂與即時時間 */}
           <div className="capsule-ticker">
-            <span className={`ticker-text ${mediaState.playbackStatus === "playing" ? "music-text" : "system-text"}`}>
-              <span className="ticker-title">
-                {mediaState.playbackStatus === "playing"
-                  ? `${mediaState.title || "未知曲目"}${mediaState.artist ? ` - ${mediaState.artist}` : ""}`
-                  : "Desktop Island 靈動島"}
+            {activeAlert ? (
+              <span className="ticker-text alert-text">
+                <span className={`ticker-alert-tag ${activeAlert.type}`}>
+                  {activeAlert.appName || (activeAlert.type === "mail" ? "新郵件" : "新通知")}
+                </span>
+                <span className="ticker-title alert-title">
+                  {activeAlert.title}
+                </span>
               </span>
-              <span className="ticker-time">
-                <span className="ticker-time-divider">|</span>
-                <span className="ticker-time-clock">{currentTime}</span>
+            ) : (
+              <span className={`ticker-text ${mediaState.playbackStatus === "playing" ? "music-text" : "system-text"}`}>
+                <span className="ticker-title">
+                  {mediaState.playbackStatus === "playing"
+                    ? `${mediaState.title || "未知曲目"}${mediaState.artist ? ` - ${mediaState.artist}` : ""}`
+                    : "Desktop Island 靈動島"}
+                </span>
+                <span className="ticker-time">
+                  <span className="ticker-time-divider">|</span>
+                  <span className="ticker-time-clock">{currentTime}</span>
+                </span>
               </span>
-            </span>
+            )}
           </div>
 
-          {/* 右側插槽：播放中顯示律動音訊波浪，未播放時顯示指示燈 */}
+          {/* 右側插槽：通知時顯示呼吸脈衝圓點，平時播放中顯示律動音浪，未播放時顯示指示燈 */}
           <div className="capsule-end-badge">
-            {mediaState.playbackStatus === "playing" ? (
+            {activeAlert ? (
+              <span className="capsule-alert-badge" title="新通知">
+                <span className={`alert-ping-dot ${activeAlert.type}`} />
+              </span>
+            ) : mediaState.playbackStatus === "playing" ? (
               <div className="capsule-waveform">
                 <span className="capsule-wave-bar bar-1" />
                 <span className="capsule-wave-bar bar-2" />

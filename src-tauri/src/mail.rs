@@ -31,6 +31,7 @@ pub struct FetchedEmailItem {
     pub snippet: String,
     pub date: String,
     pub code: Option<String>,
+    pub timestamp: i64,
 }
 
 pub fn fetch_account_emails_sync(
@@ -140,6 +141,16 @@ fn fetch_from_session<T: std::io::Read + std::io::Write>(
         let snippet = create_snippet(&body_text, 140);
         let code = extract_verification_code(&subject, &body_text);
 
+        let timestamp = msg
+            .internal_date()
+            .map(|d| d.timestamp_millis())
+            .unwrap_or_else(|| {
+                std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap_or_default()
+                    .as_millis() as i64
+            });
+
         results.push(FetchedEmailItem {
             id: format!("{}-{}", params.id, uid),
             account_id: params.id.clone(),
@@ -150,6 +161,7 @@ fn fetch_from_session<T: std::io::Read + std::io::Write>(
             snippet,
             date: format_email_date(&date_str),
             code,
+            timestamp,
         });
     }
 

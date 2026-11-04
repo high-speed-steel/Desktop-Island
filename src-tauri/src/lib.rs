@@ -2085,6 +2085,8 @@ async fn fetch_emails(
             }
         }
 
+        all_emails.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+
         Ok(all_emails)
     })
     .await

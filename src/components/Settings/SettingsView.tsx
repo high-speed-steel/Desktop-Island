@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { Mail, Plus, Trash2, Edit2, Check, Save, RefreshCw, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { emit } from '@tauri-apps/api/event';
+import { Mail, Bell, Plus, Trash2, Edit2, Check, Save, RefreshCw, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { DynamicForm, type SchemaField } from './DynamicForm';
 import { PrioritySettings, type PriorityConfig } from './PrioritySettings';
 import {
@@ -65,6 +66,22 @@ export const SettingsView: React.FC = () => {
       // 忽略
     }
     return 'pureBlack';
+  });
+
+  // 收合態通知與新郵件跳離音樂暫留秒數（預設 5 秒）
+  const [notificationDurationSec, setNotificationDurationSec] = useState<number>(() => {
+    try {
+      const raw = localStorage.getItem('focusd-island-settings');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (typeof parsed.notificationDurationSec === 'number' && parsed.notificationDurationSec > 0) {
+          return parsed.notificationDurationSec;
+        }
+      }
+    } catch {
+      // 忽略
+    }
+    return 5;
   });
 
   // 信箱帳戶多帳號設定
@@ -156,6 +173,7 @@ export const SettingsView: React.FC = () => {
         if (raw) settingsObj = JSON.parse(raw);
       } catch {}
       settingsObj.appearanceMode = appearanceMode;
+      settingsObj.notificationDurationSec = notificationDurationSec;
       localStorage.setItem('focusd-island-settings', JSON.stringify(settingsObj));
 
       // 2. 儲存多信箱帳戶
@@ -267,6 +285,36 @@ export const SettingsView: React.FC = () => {
       window.dispatchEvent(new Event('storage'));
     } catch (err) {
       console.error('儲存外觀模式失敗:', err);
+    }
+  };
+
+  const handleNotificationDurationChange = (sec: number) => {
+    setNotificationDurationSec(sec);
+    try {
+      const raw = localStorage.getItem('focusd-island-settings');
+      const parsed = raw ? JSON.parse(raw) : {};
+      parsed.notificationDurationSec = sec;
+      localStorage.setItem('focusd-island-settings', JSON.stringify(parsed));
+      window.dispatchEvent(new Event('storage'));
+    } catch (err) {
+      console.error('儲存通知停留秒數失敗:', err);
+    }
+  };
+
+  const handleTestAlert = async (type: 'notification' | 'mail') => {
+    try {
+      await emit('trigger-island-alert', {
+        type,
+        appName: type === 'mail' ? '郵件提醒' : '測試通知',
+        title:
+          type === 'mail'
+            ? '驗證碼：839201 · 登入安全驗證'
+            : `這是一則測試通知，將在 ${notificationDurationSec} 秒後切換回音樂`,
+        body: '收到新信件或通知時將自動跳離展示，並於設定時間後自動返回',
+        targetPage: type === 'mail' ? 'mail' : 'notifications',
+      });
+    } catch (err) {
+      console.error('發送測試跳轉事件失敗:', err);
     }
   };
 
@@ -762,6 +810,58 @@ export const SettingsView: React.FC = () => {
                   <div className="theme-desc">亮白半透明磨砂毛玻璃，純淨通透高雅，明亮環境下自然融入桌面。</div>
                 </div>
                 {(appearanceMode === 'whiteGlass' || appearanceMode === 'classic') && <span className="theme-badge">當前使用中</span>}
+              </div>
+            </div>
+
+            {/* 收合態通知與新信件暫留時間設定卡片 */}
+            <div className="notification-duration-card">
+              <div className="notif-duration-header">
+                <div>
+                  <h4 className="card-heading">收合態通知與新郵件跳離暫留時間</h4>
+                  <p className="card-desc">
+                    當靈動島處於膠囊收合態時，若收到新信件或系統通知，膠囊將暫時跳離音樂播放並展示通知，停留設定的時間後自動切換回音樂。
+                  </p>
+                </div>
+                <div className="duration-pill-display">{notificationDurationSec} 秒</div>
+              </div>
+
+              <div className="duration-slider-row">
+                <input
+                  type="range"
+                  min="2"
+                  max="15"
+                  step="1"
+                  value={notificationDurationSec}
+                  onChange={(e) => handleNotificationDurationChange(Number(e.target.value))}
+                  className="duration-slider"
+                />
+                <div className="slider-scale-labels">
+                  <span>2 秒 (極速)</span>
+                  <span>5 秒 (預設推薦)</span>
+                  <span>10 秒</span>
+                  <span>15 秒 (長時)</span>
+                </div>
+              </div>
+
+              <div className="duration-test-actions">
+                <button
+                  type="button"
+                  className="test-action-btn"
+                  onClick={() => handleTestAlert('notification')}
+                  title="向靈動島發送一則測試通知"
+                >
+                  <Bell size={13} />
+                  <span>測試跳轉系統通知</span>
+                </button>
+                <button
+                  type="button"
+                  className="test-action-btn"
+                  onClick={() => handleTestAlert('mail')}
+                  title="向靈動島發送一則測試郵件"
+                >
+                  <Mail size={13} />
+                  <span>測試跳轉新郵件提醒</span>
+                </button>
               </div>
             </div>
           </div>

@@ -231,6 +231,144 @@ body, html {
   box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
 }
 
+/* 膠囊插斷通知樣式 (Notification / Mail Alert) */
+.island-capsule.has-alert {
+  border-color: rgba(59, 130, 246, 0.45) !important;
+  box-shadow: 0 4px 18px rgba(59, 130, 246, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  animation: capsuleAlertGlow 2s infinite ease-in-out;
+}
+
+@keyframes capsuleAlertGlow {
+  0%, 100% {
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 22px rgba(59, 130, 246, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  }
+}
+
+.capsule-alert-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.alert-icon-bell {
+  color: #fbbf24;
+  animation: alertIconShake 1.4s ease-in-out infinite;
+}
+
+.alert-icon-mail {
+  color: #60a5fa;
+  animation: alertIconShake 1.4s ease-in-out infinite;
+}
+
+@keyframes alertIconShake {
+  0%, 100% { transform: scale(1); }
+  20% { transform: scale(1.15) rotate(-6deg); }
+  40% { transform: scale(1.12) rotate(6deg); }
+  60% { transform: scale(1.15) rotate(-3deg); }
+  80% { transform: scale(1); }
+}
+
+.ticker-text.alert-text {
+  animation: fadeInAlert 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+}
+
+.ticker-alert-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 4px;
+  line-height: 1.3;
+  flex-shrink: 0;
+}
+
+.ticker-alert-tag.notification {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.ticker-alert-tag.mail {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.ticker-title.alert-title {
+  font-size: 12px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.capsule-alert-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 10px;
+  height: 10px;
+}
+
+.alert-ping-dot {
+  width: 6.5px;
+  height: 6.5px;
+  border-radius: 50%;
+  animation: alertDotPulse 1.4s ease-in-out infinite;
+}
+
+.alert-ping-dot.notification {
+  background-color: #fbbf24;
+  box-shadow: 0 0 8px #fbbf24;
+}
+
+.alert-ping-dot.mail {
+  background-color: #60a5fa;
+  box-shadow: 0 0 8px #60a5fa;
+}
+
+@keyframes alertDotPulse {
+  0%, 100% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInAlert {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 純白風格適配 */
+.appearance-pureWhite .island-capsule.has-alert {
+  border-color: rgba(37, 99, 235, 0.45) !important;
+  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+.appearance-pureWhite .ticker-text.alert-text {
+  color: #111827;
+}
+
 /* --------------------------------------------------------------------------
    2. 展開面板態 (Expanded Panel)
    -------------------------------------------------------------------------- */
