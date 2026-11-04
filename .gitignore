@@ -29,6 +29,12 @@ src-tauri/tauri.release.conf.json
 *.sln
 *.sw?
 /demo.mp4
-dc-bot/
+dc-bot/config.json
+dc-bot/shelf/
+dc-bot/temp_cache/
+dc-bot/tempcache/
+dc-bot/__pycache__/
+dc-bot/*.pyc
+
 
 

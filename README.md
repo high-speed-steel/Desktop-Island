@@ -57,9 +57,10 @@
 - 支援**純文字**、**程式代碼**、**URL 連結**格式自動標註，以及**圖片剪貼簿**（自動生成縮圖預覽、顯示解析度與體積）。
 - 支援關鍵字即時搜尋、點擊一鍵寫回系統剪貼簿、單筆刪除與清空歷史。
 
-### 3. 檔案暫存板 (Dropover Shelf)
-- 提供類似 macOS Dropover 的輕量檔案暫存空間。
-- 支援**雙向拖曳**：可從外部拖放多個檔案/資料夾暫存，亦可直接按住暫存卡片**原生拖出至桌面、檔案總管或通訊軟體**。
+### 3. 檔案暫存板 (Dropover Shelf) 與 Discord Bot 遠端收檔
+- 提供類似 macOS Dropover 的輕量檔案暫存空間，支援資料夾手風琴原地展開與子檔案檢視。
+- 支援**雙向拖曳**：可從外部拖放多個檔案/資料夾暫存，亦可直接按住暫存卡片（或資料夾內的子檔案）**原生拖出至桌面、檔案總管或通訊軟體**。
+- **Discord Bot 遠端傳檔整合 (`dc-bot/`)**：支援透過 Discord 私訊（直接傳送或轉發附件）自動下載檔案並推入暫存板。支援多檔案 30 秒互動打包決策，下載完成後主動叫醒靈動島並在收合膠囊提示「`bot已收錄檔案至暫存板`」（詳見 [`dc-bot/README.md`](dc-bot/README.md)）。
 - 自動格式化檔案體積（B / KB / MB / GB）與副檔名專屬圖示。
 - 支援點擊呼叫系統預設軟體直接開啟、一鍵在「檔案總管中顯示定位」、快速拷貝絕對路徑。
 
@@ -248,10 +249,18 @@ Desktop Island 支援將待辦清單與每日筆記持久化為本地 `.md` 檔�
 │   │   ├── main.rs                    # 桌面程式入口
 │   │   ├── clipboard_history.rs       # Windows 剪貼簿底層原生監聽與圖像捕獲
 │   │   ├── media_control.rs           # Windows SMTC 媒體會話與控制
+│   │   ├── shelf_server.rs            # 暫存板本機接收服務 (與 Discord Bot 對接)
 │   │   ├── translation.rs             # 翻譯服務與獨立視窗
 │   │   ├── core/                      # 設定儲存與優先級核心
 │   │   └── modules/                   # 模組清單定義
 │   └── capabilities/                  # Tauri 2 權限聲明配置
+├── dc-bot/                            # Discord 遠端傳檔暫存板機器人
+│   ├── bot.py                         # Discord Bot 主程式
+│   ├── config.example.json            # 配置檔範例 (請複製為 config.json 使用)
+│   ├── requirements.txt               # Python 依賴套件
+│   ├── start_background.vbs           # Windows 無視窗背景常駐啟動腳本
+│   ├── stop_bot.bat                   # 一鍵停止機器人腳本
+│   └── README.md                      # Bot 完整設定與操作手冊
 ├── package.json                       # 前端依賴配置
 ├── vite.config.ts                     # Vite 建置配置
 └── README.md                          # 專案說明文檔

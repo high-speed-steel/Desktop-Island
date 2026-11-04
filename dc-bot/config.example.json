@@ -1,0 +1,8 @@
+{
+  "bot_token": "YOUR_DISCORD_BOT_TOKEN_HERE",
+  "shelf_dir": "./shelf",
+  "temp_cache_dir": "./temp_cache",
+  "island_notify_url": "http://127.0.0.1:28848/notify",
+  "max_file_size_mb": 50,
+  "bundle_timeout_seconds": 30
+}
