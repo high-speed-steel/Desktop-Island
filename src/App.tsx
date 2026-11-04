@@ -504,8 +504,29 @@ export const App: React.FC = () => {
       }
     };
     setupDragDrop();
+
+    // 監聽來自 Bot (HTTP POST) 推送的新檔案，自動展開島嶼並切換到暫存板
+    let unlistenRemote: (() => void) | undefined;
+    listen<string[]>("shelf:remote-files-added", (event) => {
+      if (Array.isArray(event.payload) && event.payload.length > 0) {
+        setMode("expanded");
+        syncInteraction("expanded");
+        setActivePage("shelf");
+        setTimeout(() => {
+          window.dispatchEvent(
+            new CustomEvent("focusd-shelf-add-files", {
+              detail: event.payload,
+            })
+          );
+        }, 120);
+      }
+    }).then((un) => {
+      unlistenRemote = un;
+    });
+
     return () => {
       if (unlisten) unlisten();
+      if (unlistenRemote) unlistenRemote();
     };
   }, [syncInteraction]);
 

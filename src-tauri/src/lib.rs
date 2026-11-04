@@ -5,6 +5,7 @@ mod clipboard_history;
 mod mail;
 mod media_control;
 mod notifications;
+mod shelf_server;
 mod translation;
 
 use crate::core::config::{load_app_config, save_app_config, AppConfig, PriorityPolicy};
@@ -2190,6 +2191,7 @@ pub fn run() {
             if let Err(error) = notifications::init(app.handle()) {
                 eprintln!("failed to initialize notifications: {error}");
             }
+            shelf_server::init(app.handle().clone());
             translation::init(app.handle());
             if let Ok(window) = main_window(app.handle()) {
                 if let Err(error) = apply_stage_geometry(&window, IslandWindowState::default(), false) {
