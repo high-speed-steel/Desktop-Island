@@ -1,0 +1,32 @@
+{
+  "id": "media_smtc",
+  "name": "多媒體控制與歌詞",
+  "version": "1.0.0",
+  "description": "Windows 原生 SMTC 音樂播放控制與開源 LRCLIB 即時歌詞",
+  "enabled_by_default": true,
+  "default_priority": "active",
+  "dismiss_timeout_ms": 5000,
+  "settings_schema": [
+    {
+      "key": "show_waveform",
+      "label": "顯示音訊動態波形",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "key": "enable_lrclib",
+      "label": "啟用 LRCLIB 線上歌詞",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "key": "poll_interval_ms",
+      "label": "媒體狀態輪詢週期 (毫秒)",
+      "type": "range",
+      "min": 200,
+      "max": 2000,
+      "step": 100,
+      "default": 500
+    }
+  ]
+}

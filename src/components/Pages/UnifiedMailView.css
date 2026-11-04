@@ -1,0 +1,257 @@
+.unified-mail-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+.mail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 0 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mail-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mail-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.mail-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.account-filter-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px;
+  border-radius: 8px;
+  overflow-x: auto;
+  max-width: 320px;
+}
+
+.account-filter-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.filter-tab:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.filter-tab.active {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.filter-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.config-mail-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #9ca3af;
+  border-radius: 6px;
+  padding: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.config-mail-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.mail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  max-height: 310px;
+  padding-right: 2px;
+}
+
+.mail-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.mail-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+.mail-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.mail-card:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.mail-card.has-verification-code {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.03);
+}
+
+.mail-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mail-sender-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.source-badge {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+
+.mail-sender {
+  font-size: 12px;
+  font-weight: 500;
+  color: #d1d5db;
+}
+
+.mail-date {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.mail-subject {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* 驗證碼高亮專區 */
+.verification-code-box {
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 4px 0;
+}
+
+.code-text-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.code-key-icon {
+  color: #fbbf24;
+}
+
+.code-label {
+  font-size: 12px;
+  color: #fde68a;
+  font-weight: 500;
+}
+
+.code-value {
+  font-size: 15px;
+  font-weight: 800;
+  color: #fef08a;
+  font-family: monospace;
+  letter-spacing: 1.5px;
+}
+
+.copy-code-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #f59e0b;
+  border: 1px solid #fbbf24;
+  color: #000000;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copy-code-btn:hover {
+  background: #d97706;
+}
+
+.copy-code-btn.copied {
+  background: #22c55e;
+  border-color: #4ade80;
+  color: #ffffff;
+}
+
+.mail-snippet {
+  font-size: 11.5px;
+  color: #9ca3af;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mail-empty {
+  text-align: center;
+  padding: 40px 0;
+  color: #6b7280;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}

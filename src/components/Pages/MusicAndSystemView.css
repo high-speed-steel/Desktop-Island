@@ -1,0 +1,329 @@
+.music-system-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+.section-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+}
+
+/* 擴大後的音樂卡片區塊 */
+.music-section-expanded {
+  padding: 16px 18px 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.music-top-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+/* 大尺寸專輯封面圖 (130px) */
+.album-art-wrapper-large {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+  background: #111116;
+}
+
+.album-art-image-large {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.album-art-wrapper-large:hover .album-art-image-large {
+  transform: scale(1.03);
+}
+
+.album-art-fallback-large {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, #252530 0%, #0d0d12 100%);
+  color: #555;
+  position: relative;
+}
+
+.album-art-fallback-large .vinyl-center-hole {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #000;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 右側歌曲詳細與控制 */
+.music-details-large {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.music-title-wave-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.track-title-large {
+  font-size: 19px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.2px;
+}
+
+/* 播放中跳動音訊波浪 */
+.audio-waveform {
+  display: flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.wave-bar {
+  width: 3px;
+  border-radius: 2px;
+  background-color: #22c55e;
+  transition: height 0.2s ease;
+}
+
+.audio-waveform.playing .wave-bar {
+  animation: soundWaveJump 1.2s infinite ease-in-out alternate;
+}
+
+.audio-waveform.playing .bar-1 { animation-delay: 0.1s; height: 14px; }
+.audio-waveform.playing .bar-2 { animation-delay: 0.4s; height: 8px; }
+.audio-waveform.playing .bar-3 { animation-delay: 0.2s; height: 16px; }
+.audio-waveform.playing .bar-4 { animation-delay: 0.5s; height: 10px; }
+.audio-waveform.playing .bar-5 { animation-delay: 0.3s; height: 13px; }
+
+.audio-waveform.paused .wave-bar {
+  height: 4px !important;
+  background-color: #6b7280;
+  animation: none;
+}
+
+@keyframes soundWaveJump {
+  0% {
+    height: 4px;
+  }
+  50% {
+    height: 16px;
+  }
+  100% {
+    height: 7px;
+  }
+}
+
+.track-artist-large {
+  font-size: 14px;
+  color: #9ca3af;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+/* 控制按鈕行 */
+.music-controls-row-large {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.ctrl-btn-large {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: inherit;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.ctrl-btn-large:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: scale(1.06);
+}
+
+.ctrl-btn-large.main-ctrl-large {
+  width: 40px;
+  height: 40px;
+  background: #3b82f6;
+  border-color: #60a5fa;
+  color: #ffffff;
+  font-size: 15px;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+}
+
+.ctrl-btn-large.main-ctrl-large:hover {
+  background: #2563eb;
+  transform: scale(1.08);
+}
+
+/* 歌曲進度條 */
+.progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.progress-track-wrapper {
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.progress-track-bg {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.12);
+  position: relative;
+  overflow: visible;
+  transition: height 0.15s;
+}
+
+.progress-track-wrapper:hover .progress-track-bg {
+  height: 6px;
+}
+
+.progress-track-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: #3b82f6;
+  position: relative;
+  transition: width 0.15s linear;
+}
+
+.progress-thumb {
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  transform: translateY(-50%) scale(0);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+  transition: transform 0.15s;
+}
+
+.progress-track-wrapper:hover .progress-thumb {
+  transform: translateY(-50%) scale(1);
+}
+
+.progress-timestamps {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.time-text {
+  font-size: 10.5px;
+  color: #9ca3af;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+}
+
+/* 常駐系統資訊（4 個指標：CPU、GPU、RAM、網速） */
+.system-section {
+  padding: 10px 14px;
+}
+
+.system-compact-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.stat-pill {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.stat-pill-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-pill-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: #888888;
+  letter-spacing: 0.3px;
+}
+
+.stat-pill-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: inherit;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+}
+
+.stat-pill-value.net-value {
+  font-size: 11px;
+}
+
+.stat-progress-bar {
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 1px;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.cpu-color { color: #38bdf8; }
+.cpu-fill { background: #38bdf8; }
+
+.gpu-color { color: #a855f7; }
+.gpu-fill { background: #a855f7; }
+
+.ram-color { color: #f59e0b; }
+.ram-fill { background: #f59e0b; }
+
+.net-color { color: #10b981; }
+.net-fill { background: #10b981; }

@@ -1,0 +1,807 @@
+/* ==========================================================================
+   Desktop Island (靈動島) 全新純淨樣式系統 - 原汁原味光學液態玻璃版
+   ========================================================================== */
+
+:root {
+  --island-radius-capsule: 18px;
+  --island-radius-panel: 20px;
+  --font-family-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* 原版液態玻璃光學常數 */
+  --glass-intensity: 0.72;
+  --glass-soft-alpha: 0.077;
+  --glass-shadow-alpha: 0.212;
+  --glass-inset-alpha: 0.344;
+  --glass-cyan-alpha: 0.115;
+  --glass-magenta-alpha: 0.072;
+  --glass-glow-alpha: 0.26;
+  --glass-accent-alpha: 0.04;
+  --glass-refraction-opacity: 0.72;
+  --glass-border-alpha: 0.23;
+  --glass-inner-accent-alpha: 0.058;
+  --glass-highlight-opacity: 0.61;
+  --glass-panel-blur: 18px;
+  --glass-tint-color: rgba(47, 47, 55, 0.53);
+  --glass-collapsed-tint-color: rgba(47, 47, 55, 0.8);
+  --glass-page-accent: 116, 214, 255;
+  --glass-pointer-x: 50%;
+  --glass-pointer-y: 18%;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: transparent !important;
+  font-family: var(--font-family-system);
+  user-select: none;
+}
+
+/* 靈動島根容器：完全緊貼頂部，吸附螢幕上邊界 */
+.desktop-island-root {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 0 !important;
+  background: transparent !important;
+}
+
+/* --------------------------------------------------------------------------
+   1. 膠囊摺疊態 (Capsule) - 迷你專輯封面 & 音訊波浪
+   -------------------------------------------------------------------------- */
+.island-capsule {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 36px;
+  min-width: 250px;
+  max-width: 400px;
+  padding: 0 14px;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 18px;
+  border-top: none !important;
+  cursor: grab;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, width, box-shadow;
+  overflow: hidden;
+}
+
+.island-capsule:active {
+  cursor: grabbing;
+}
+
+/* 拖出螢幕頂端後的懸浮脫離狀態 (Detached Floating) */
+.island-capsule.detached {
+  border-top-left-radius: 18px !important;
+  border-top-right-radius: 18px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+  margin-top: 6px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+}
+
+.island-capsule:hover {
+  transform: translateY(1px) scale(1.01);
+}
+
+.capsule-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+/* 迷你專輯封面縮圖 */
+.capsule-mini-album-art {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  object-fit: cover;
+  display: block;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 去背白點專屬圖示 */
+.capsule-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+  animation: pulseWhiteDot 2.4s infinite ease-in-out;
+}
+
+@keyframes pulseWhiteDot {
+  0%, 100% {
+    transform: scale(0.9);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.95);
+  }
+}
+
+.capsule-ticker {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.ticker-text {
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inline-icon {
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+/* 膠囊右側插槽：迷你動態音訊波浪 */
+.capsule-end-badge {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.capsule-waveform {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+
+.capsule-wave-bar {
+  width: 2.5px;
+  border-radius: 1.5px;
+  background-color: #22c55e;
+  animation: capsuleWaveJump 1s infinite ease-in-out alternate;
+}
+
+.capsule-waveform .bar-1 { animation-delay: 0.1s; height: 10px; }
+.capsule-waveform .bar-2 { animation-delay: 0.35s; height: 6px; }
+.capsule-waveform .bar-3 { animation-delay: 0.2s; height: 12px; }
+.capsule-waveform .bar-4 { animation-delay: 0.45s; height: 7px; }
+
+@keyframes capsuleWaveJump {
+  0% { height: 3px; }
+  50% { height: 12px; }
+  100% { height: 5px; }
+}
+
+.pulse-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
+}
+
+/* --------------------------------------------------------------------------
+   2. 展開面板態 (Expanded Panel)
+   -------------------------------------------------------------------------- */
+.island-expanded-panel {
+  position: relative;
+  width: 530px;
+  height: 385px;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  border-top: none !important;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: panelSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+.island-expanded-panel.detached {
+  border-top-left-radius: 20px !important;
+  border-top-right-radius: 20px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+  margin-top: 6px;
+}
+
+@keyframes panelSlideDown {
+  0% {
+    opacity: 0.3;
+    transform: translateY(-6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 頂部瀏覽器風格 Tab 欄 */
+.island-tab-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  gap: 4px;
+  flex-shrink: 0;
+  z-index: 2;
+  cursor: grab;
+}
+
+.island-tab-header:active {
+  cursor: grabbing;
+}
+
+.browser-tabs-scroll-area {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  overflow-x: auto;
+  flex: 1;
+  padding: 1px 0;
+}
+
+.browser-tabs-scroll-area::-webkit-scrollbar {
+  display: none;
+}
+
+.browser-tab-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6.5px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.16s ease;
+  flex-shrink: 0;
+  /* 沒被選到的標籤：字體變黑色，自帶柔和淺底確保清晰可讀 */
+  color: #000000 !important;
+  background: rgba(255, 255, 255, 0.68) !important;
+}
+
+.tab-icon {
+  display: flex;
+  align-items: center;
+}
+
+.tab-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.action-icon-btn {
+  background: transparent;
+  border: none;
+  border-radius: 5px;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+/* 內容主體區 */
+.island-content-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+  z-index: 2;
+}
+
+.island-content-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.island-content-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+/* ==========================================================================
+   原版液態玻璃光學折射架構 (.island__glass)
+   ========================================================================== */
+.island__glass {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.island__glass::before,
+.island__glass::after,
+.island__glass-refraction,
+.island__glass-highlight {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+/* 滑鼠指標動態跟隨光斑 */
+.island__glass::before {
+  width: 52%;
+  aspect-ratio: 1;
+  left: var(--glass-pointer-x);
+  top: var(--glass-pointer-y);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, var(--glass-glow-alpha)),
+    rgba(var(--glass-page-accent), var(--glass-accent-alpha)) 38%,
+    transparent 70%
+  );
+  filter: blur(22px);
+  opacity: 0.95;
+  transform: translate(-50%, -50%);
+  transition:
+    left 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    top 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* 雙層光學色散折射覆蓋 */
+.island__glass::after {
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(112deg, rgba(116, 214, 255, 0.12), transparent 16% 82%, rgba(255, 156, 224, 0.1)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 22% 82%, rgba(20, 40, 52, 0.08));
+  mix-blend-mode: screen;
+  opacity: var(--glass-refraction-opacity);
+}
+
+/* 內層色散折射邊框 */
+.island__glass-refraction {
+  inset: 1px;
+  border: 1px solid rgba(255, 255, 255, var(--glass-border-alpha));
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 16px rgba(var(--glass-page-accent), var(--glass-inner-accent-alpha)),
+    inset 0 0 2px rgba(255, 255, 255, 0.28);
+}
+
+/* 頂部隨滑鼠左右滑動的動態白光細流條 */
+.island__glass-highlight {
+  top: 1px;
+  left: var(--glass-pointer-x);
+  width: 44%;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.88), transparent);
+  filter: blur(0.4px);
+  opacity: var(--glass-highlight-opacity);
+  transform: translateX(-50%);
+  transition: left 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* --------------------------------------------------------------------------
+   3. 原汁原味「液態玻璃」(Liquid Glass) 樣式
+   -------------------------------------------------------------------------- */
+.appearance-liquidGlass .island-capsule {
+  isolation: isolate;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.11), transparent 42%),
+    linear-gradient(180deg, transparent 48%, rgba(6, 16, 24, 0.1)),
+    var(--glass-collapsed-tint-color) !important;
+  box-shadow:
+    0 12px 34px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.36),
+    inset 0 -1px 0 rgba(8, 22, 32, 0.18),
+    inset 1px 0 0 rgba(116, 214, 255, 0.18),
+    inset -1px 0 0 rgba(255, 156, 224, 0.12) !important;
+  backdrop-filter: blur(var(--glass-panel-blur)) saturate(1.22) !important;
+  -webkit-backdrop-filter: blur(var(--glass-panel-blur)) saturate(1.22) !important;
+  color: #f8f6f0 !important;
+  border: none !important;
+}
+
+.appearance-liquidGlass .island-capsule:hover {
+  box-shadow:
+    0 8px 26px rgba(0, 0, 0, 0.25),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.38),
+    inset 0 0 18px rgba(255, 255, 255, 0.12),
+    inset 1px 0 0 rgba(116, 214, 255, 0.26),
+    inset -1px 0 0 rgba(255, 156, 224, 0.18) !important;
+}
+
+.appearance-liquidGlass .island-expanded-panel {
+  isolation: isolate;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.36), transparent 96px),
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, var(--glass-soft-alpha)),
+      transparent 42%
+    ),
+    linear-gradient(
+      165deg,
+      transparent 42%,
+      rgba(2, 8, 14, 0.08)
+    ),
+    var(--glass-tint-color) !important;
+  box-shadow:
+    0 18px 46px rgba(0, 0, 0, var(--glass-shadow-alpha)),
+    inset 0 1px 0 rgba(255, 255, 255, var(--glass-inset-alpha)),
+    inset 0 -1px 0 rgba(8, 18, 28, 0.16),
+    inset 1px 0 0 rgba(130, 224, 255, var(--glass-cyan-alpha)),
+    inset -1px 0 0 rgba(255, 158, 230, var(--glass-magenta-alpha)) !important;
+  backdrop-filter: blur(var(--glass-panel-blur)) saturate(1.22) !important;
+  -webkit-backdrop-filter: blur(var(--glass-panel-blur)) saturate(1.22) !important;
+  color: #f8f6f0 !important;
+  border: none !important;
+}
+
+.appearance-liquidGlass .island-tab-header {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.appearance-liquidGlass .browser-tab-item {
+  color: #000000 !important;
+  background: rgba(255, 255, 255, 0.65) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.appearance-liquidGlass .browser-tab-item:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #000000 !important;
+}
+
+.appearance-liquidGlass .browser-tab-item.active {
+  background: #ffffff !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
+  border: 1px solid #ffffff !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35) !important;
+}
+
+.appearance-liquidGlass .action-icon-btn {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.appearance-liquidGlass .action-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+}
+
+.appearance-liquidGlass .section-card,
+.appearance-liquidGlass .clipboard-card,
+.appearance-liquidGlass .todo-item,
+.appearance-liquidGlass .mail-card,
+.appearance-liquidGlass .shelf-item,
+.appearance-liquidGlass .translate-box-source,
+.appearance-liquidGlass .translate-box-target {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. 外觀模式：純黑風格 (Pure Black)
+   -------------------------------------------------------------------------- */
+.appearance-pureBlack .island-capsule {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.85) !important;
+}
+
+.appearance-pureBlack .island-expanded-panel {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.95) !important;
+}
+
+.appearance-pureBlack .island-tab-header {
+  background: #080808 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.appearance-pureBlack .browser-tab-item {
+  color: #000000 !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+}
+
+.appearance-pureBlack .browser-tab-item:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #000000 !important;
+}
+
+.appearance-pureBlack .browser-tab-item.active {
+  background: #ffffff !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
+  border: 1px solid #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7) !important;
+}
+
+.appearance-pureBlack .action-icon-btn {
+  color: #888888 !important;
+}
+
+.appearance-pureBlack .action-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+
+.appearance-pureBlack .action-icon-btn.close-btn:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #f87171 !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. 外觀模式：純白風格 (Pure White)
+   -------------------------------------------------------------------------- */
+.appearance-pureWhite .island-capsule {
+  background: #ffffff !important;
+  color: #111111 !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.14) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.14) !important;
+  border-left: 1px solid rgba(0, 0, 0, 0.14) !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+.appearance-pureWhite .capsule-dot {
+  background-color: #111111 !important;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+.appearance-pureWhite .island-expanded-panel {
+  background: #ffffff !important;
+  color: #111111 !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.14) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.14) !important;
+  border-left: 1px solid rgba(0, 0, 0, 0.14) !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.14) !important;
+}
+
+.appearance-pureWhite .island-tab-header {
+  background: #f5f5f7 !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.appearance-pureWhite .browser-tab-item {
+  color: #000000 !important;
+  background: #e4e4e7 !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+}
+
+.appearance-pureWhite .browser-tab-item:hover {
+  background: #d4d4d8 !important;
+  color: #000000 !important;
+}
+
+.appearance-pureWhite .browser-tab-item.active {
+  background: #ffffff !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
+  border: 1px solid rgba(0, 0, 0, 0.25) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+}
+
+.appearance-pureWhite .action-icon-btn {
+  color: #666666 !important;
+}
+
+.appearance-pureWhite .action-icon-btn:hover {
+  background: rgba(0, 0, 0, 0.06) !important;
+  color: #000000 !important;
+}
+
+.appearance-pureWhite .action-icon-btn.close-btn:hover {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #ef4444 !important;
+}
+
+/* --------------------------------------------------------------------------
+   6. 外觀模式：白玻璃 (White Glass)
+   -------------------------------------------------------------------------- */
+.appearance-whiteGlass .island-capsule,
+.appearance-classic .island-capsule {
+  isolation: isolate;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6) 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(240, 240, 245, 0.6)) !important;
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.06),
+    inset 1px 0 0 rgba(255, 255, 255, 0.6),
+    inset -1px 0 0 rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(20px) saturate(1.8) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
+  color: #111111 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.65) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.65) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.65) !important;
+}
+
+.appearance-whiteGlass .capsule-dot,
+.appearance-classic .capsule-dot {
+  background-color: #111111 !important;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.25) !important;
+}
+
+.appearance-whiteGlass .island-expanded-panel,
+.appearance-classic .island-expanded-panel {
+  isolation: isolate;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.76) 120px, rgba(248, 248, 252, 0.82)) !important;
+  box-shadow:
+    0 20px 48px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.06),
+    inset 1px 0 0 rgba(255, 255, 255, 0.7),
+    inset -1px 0 0 rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(26px) saturate(1.6) !important;
+  -webkit-backdrop-filter: blur(26px) saturate(1.6) !important;
+  color: #18181b !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.85) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.85) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.85) !important;
+}
+
+.appearance-whiteGlass .island-tab-header,
+.appearance-classic .island-tab-header {
+  background: rgba(255, 255, 255, 0.5) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.appearance-whiteGlass .browser-tab-item,
+.appearance-classic .browser-tab-item {
+  color: #000000 !important;
+  background: rgba(255, 255, 255, 0.65) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.appearance-whiteGlass .browser-tab-item:hover,
+.appearance-classic .browser-tab-item:hover {
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: #000000 !important;
+}
+
+.appearance-whiteGlass .browser-tab-item.active,
+.appearance-classic .browser-tab-item.active {
+  background: #ffffff !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
+  border: 1px solid rgba(0, 0, 0, 0.22) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.appearance-whiteGlass .action-icon-btn,
+.appearance-classic .action-icon-btn {
+  color: #4b5563 !important;
+}
+
+.appearance-whiteGlass .action-icon-btn:hover,
+.appearance-classic .action-icon-btn:hover {
+  background: rgba(0, 0, 0, 0.07) !important;
+  color: #111827 !important;
+}
+
+.appearance-whiteGlass .action-icon-btn.close-btn:hover,
+.appearance-classic .action-icon-btn.close-btn:hover {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #ef4444 !important;
+}
+
+.appearance-whiteGlass .section-card,
+.appearance-whiteGlass .clipboard-card,
+.appearance-whiteGlass .todo-item,
+.appearance-whiteGlass .mail-card,
+.appearance-whiteGlass .shelf-item,
+.appearance-whiteGlass .translate-box-source,
+.appearance-whiteGlass .translate-box-target,
+.appearance-classic .section-card,
+.appearance-classic .clipboard-card,
+.appearance-classic .todo-item,
+.appearance-classic .mail-card,
+.appearance-classic .shelf-item,
+.appearance-classic .translate-box-source,
+.appearance-classic .translate-box-target {
+  background: rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  color: #1f2937 !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03) !important;
+}
+
+/* 亮色主題通用文字深色適配 (純白 pureWhite 與 白玻璃 whiteGlass) */
+.appearance-pureWhite .track-title-large,
+.appearance-whiteGlass .track-title-large,
+.appearance-classic .track-title-large {
+  color: #111827 !important;
+}
+
+.appearance-pureWhite .track-artist-large,
+.appearance-whiteGlass .track-artist-large,
+.appearance-classic .track-artist-large,
+.appearance-pureWhite .time-label,
+.appearance-whiteGlass .time-label,
+.appearance-classic .time-label,
+.appearance-pureWhite .stat-pill-name,
+.appearance-whiteGlass .stat-pill-name,
+.appearance-classic .stat-pill-name,
+.appearance-pureWhite .stat-card-title,
+.appearance-whiteGlass .stat-card-title,
+.appearance-classic .stat-card-title {
+  color: #4b5563 !important;
+}
+
+.appearance-pureWhite .progress-track,
+.appearance-whiteGlass .progress-track,
+.appearance-classic .progress-track,
+.appearance-pureWhite .stat-progress-bar,
+.appearance-whiteGlass .stat-progress-bar,
+.appearance-classic .stat-progress-bar {
+  background: rgba(0, 0, 0, 0.08) !important;
+}
+
+.appearance-pureWhite .stat-pill-compact,
+.appearance-whiteGlass .stat-pill-compact,
+.appearance-classic .stat-pill-compact {
+  background: rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+/* 懸浮脫離頂部時的主題邊框與立體陰影增強 */
+.appearance-pureBlack .island-capsule.detached,
+.appearance-pureBlack .island-expanded-panel.detached {
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9) !important;
+}
+
+.appearance-pureWhite .island-capsule.detached,
+.appearance-pureWhite .island-expanded-panel.detached {
+  border: 1px solid rgba(0, 0, 0, 0.16) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+.appearance-whiteGlass .island-capsule.detached,
+.appearance-whiteGlass .island-expanded-panel.detached {
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+}
+
+.appearance-liquidGlass .island-capsule.detached,
+.appearance-liquidGlass .island-expanded-panel.detached {
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}

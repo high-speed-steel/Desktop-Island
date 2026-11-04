@@ -1,0 +1,35 @@
+{
+  "id": "translation",
+  "name": "快捷多模型翻譯",
+  "version": "1.0.0",
+  "description": "支援 OpenAI 相容介面、Google 免費翻譯與本機 Ollama 快捷翻譯視窗",
+  "enabled_by_default": true,
+  "default_priority": "overview",
+  "dismiss_timeout_ms": 4000,
+  "settings_schema": [
+    {
+      "key": "provider",
+      "label": "翻譯服務端點",
+      "type": "string",
+      "default": "https://api.deepseek.com"
+    },
+    {
+      "key": "api_key",
+      "label": "API 密鑰 (金鑰安全存放)",
+      "type": "password",
+      "default": ""
+    },
+    {
+      "key": "model",
+      "label": "模型名稱",
+      "type": "string",
+      "default": "deepseek-chat"
+    },
+    {
+      "key": "target_lang",
+      "label": "預設目標語言",
+      "type": "string",
+      "default": "zh-TW"
+    }
+  ]
+}

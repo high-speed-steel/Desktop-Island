@@ -1,0 +1,35 @@
+{
+  "id": "clipboard",
+  "name": "圖文剪貼簿歷史",
+  "version": "1.0.0",
+  "description": "自動記錄複製的文字與圖片歷史，支援快捷搜尋與置頂",
+  "enabled_by_default": true,
+  "default_priority": "overview",
+  "dismiss_timeout_ms": 3000,
+  "settings_schema": [
+    {
+      "key": "capture_images",
+      "label": "記錄圖片內容",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "key": "max_items",
+      "label": "最大保留筆數",
+      "type": "number",
+      "min": 10,
+      "max": 200,
+      "step": 10,
+      "default": 50
+    },
+    {
+      "key": "auto_clean_days",
+      "label": "自動清理天數",
+      "type": "range",
+      "min": 1,
+      "max": 30,
+      "step": 1,
+      "default": 7
+    }
+  ]
+}
