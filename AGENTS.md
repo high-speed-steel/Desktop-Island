@@ -115,9 +115,12 @@ pnpm tauri build --no-bundle
 
 ## 本機更新與桌面快捷方式
 
-- 每次完成應用更新併成功生成 release 可執行文件後，都要檢查並同步當前用戶桌面的島嶼快捷方式，無需再次確認；僅文檔改動不需要重新構建。
-- 優先更新已有的 FocuSD / fly-island 快捷方式；不存在時創建 `fly-island.lnk`。使用 Windows 當前用戶的實際桌面目錄，不硬編碼用戶名或桌面路徑。
-- 快捷方式目標應指向當前倉庫的 `src-tauri/target/release/desktop-island.exe` 絕對路徑，工作目錄設為該程序所在目錄，圖示使用該可執行文件。不得指向 debug 程序、舊備份或臨時構建目錄。
+- 程式名稱與桌面捷徑一律命名為 `desktop-Island`（可執行檔為 `desktop-island.exe`，桌面捷徑為 `desktop-Island.lnk`）。
+- 每次完成應用更新並成功生成 release 可執行文件後，必須**同時同步更新兩個位置的 exe**：
+  1. `src-tauri/target/release/desktop-island.exe`
+  2. `release/desktop-island.exe`
+- 同步檢查並更新 Windows 當前用戶桌面的 `desktop-Island.lnk` 捷徑，無需再次確認；清理任何舊的 `fly-island.lnk`。
+- 捷徑目標指向 `release/desktop-island.exe`（或 `src-tauri/target/release/desktop-island.exe`）絕對路徑，工作目錄設為該程序所在目錄，圖示使用該可執行檔。
 - 構建失敗時不切換快捷方式。更新後重新讀取快捷方式，確認目標文件存在、目標路徑與本次成功構建產物一致，再報告完成；不要修改其他應用的快捷方式。
 
 ## Git 與協作
