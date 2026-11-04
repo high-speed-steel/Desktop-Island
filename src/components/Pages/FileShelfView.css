@@ -130,7 +130,8 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 220px;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding-right: 2px;
 }
@@ -348,16 +349,16 @@
   color: #ffffff;
 }
 
-/* 2. 資料夾展開態（1 格高變 2 格高，約 80px） */
+/* 2. 資料夾展開態（高度充裕，支援子檔案捲動） */
 .shelf-folder-card.is-expanded {
-  height: 80px;
-  min-height: 80px;
+  height: 98px;
+  min-height: 98px;
   background: rgba(245, 158, 11, 0.05);
   border: 1px solid rgba(245, 158, 11, 0.35);
   border-radius: 8px;
   padding: 6px 8px;
   display: grid;
-  grid-template-columns: 125px 1fr 28px;
+  grid-template-columns: 135px 1fr 28px;
   gap: 8px;
   align-items: stretch;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
@@ -365,11 +366,14 @@
   overflow: hidden;
 }
 
-/* 左欄：資料夾名稱 + 拖整份 */
+/* 左欄：資料夾名稱居中放大 + 拖整份 */
 .folder-left-col {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 5px;
   padding-right: 6px;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   cursor: grab;
@@ -381,16 +385,18 @@
   cursor: grabbing;
 }
 
-.folder-left-top {
+.folder-left-center-group {
   display: flex;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
   overflow: hidden;
 }
 
 .folder-left-name {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   color: #fde68a;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -399,18 +405,19 @@
 
 .folder-left-bottom {
   display: flex;
-  flex-direction: column;
-  gap: 1px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }
 
 .folder-left-count {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   color: #fbbf24;
 }
 
 .folder-drag-hint {
-  font-size: 9px;
+  font-size: 10px;
   color: #94a3b8;
   opacity: 0.8;
   white-space: nowrap;
@@ -436,8 +443,8 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 3.5px;
-  padding-right: 4px;
+  gap: 4px;
+  padding: 2px 4px 6px 2px;
 }
 
 .folder-subfiles-scroll::-webkit-scrollbar {
@@ -462,12 +469,13 @@
 .folder-subfile-item {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 6px;
+  gap: 6px;
+  min-height: 25px;
+  padding: 4px 7px;
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  font-size: 11px;
+  font-size: 11.5px;
   color: #e2e8f0;
   cursor: grab;
   transition: all 0.15s ease;

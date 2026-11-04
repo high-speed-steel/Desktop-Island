@@ -433,7 +433,7 @@ export const FileShelfView: React.FC = () => {
                     key={file.id}
                     className="shelf-folder-card is-expanded"
                   >
-                    {/* 左欄：資料夾名稱，按住可拖出「整個資料夾」，點擊可收合 */}
+                    {/* 左欄：資料夾名稱，居中較大字體，按住可拖出「整個資料夾」，點擊可收合 */}
                     <div
                       className="folder-left-col"
                       draggable={true}
@@ -441,15 +441,15 @@ export const FileShelfView: React.FC = () => {
                       onClick={() => setExpandedFolderId(null)}
                       title={`按住拖出「整個資料夾」；點擊收合回 1 格：${file.name}`}
                     >
-                      <div className="folder-left-top">
-                        <Folder size={15} className="text-amber-400 flex-shrink-0" />
+                      <div className="folder-left-center-group">
+                        <Folder size={17} className="text-amber-400 flex-shrink-0" />
                         <span className="folder-left-name" title={file.name}>
                           {file.name}
                         </span>
                       </div>
                       <div className="folder-left-bottom">
                         <span className="folder-left-count">{count} 個檔案</span>
-                        <span className="folder-drag-hint">拖整份 · 點擊收合</span>
+                        <span className="folder-drag-hint">按住拖整份</span>
                       </div>
                     </div>
 
