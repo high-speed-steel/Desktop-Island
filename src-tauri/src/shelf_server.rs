@@ -37,20 +37,16 @@ pub fn init(app_handle: AppHandle) {
                 if let Ok(json_val) = serde_json::from_str::<serde_json::Value>(body) {
                     let mut paths_to_add: Vec<String> = Vec::new();
 
-                    if let Some(path) = json_val.get("path").and_then(|p| p.as_str()) {
+                    // 如果是打包資料夾 (bundle)，優先將整個資料夾加入暫存板
+                    if let Some(bundle_dir) = json_val.get("bundle_dir").and_then(|b| b.as_str()) {
+                        paths_to_add.push(bundle_dir.to_string());
+                    } else if let Some(path) = json_val.get("path").and_then(|p| p.as_str()) {
                         paths_to_add.push(path.to_string());
                     } else if let Some(files) = json_val.get("files").and_then(|f| f.as_array()) {
                         for item in files {
                             if let Some(p) = item.as_str() {
                                 paths_to_add.push(p.to_string());
                             }
-                        }
-                    }
-
-                    // 如果是 bundle 資料夾
-                    if let Some(bundle_dir) = json_val.get("bundle_dir").and_then(|b| b.as_str()) {
-                        if paths_to_add.is_empty() {
-                            paths_to_add.push(bundle_dir.to_string());
                         }
                     }
 
