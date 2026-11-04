@@ -219,8 +219,8 @@ export const App: React.FC = () => {
   // 膠囊收合態瞬時插斷通知狀態（收到新通知/郵件時暫時跳離音樂，停留設定時間後自動返回）
   const [activeAlert, setActiveAlert] = useState<ActiveAlert | null>(null);
   const alertTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const appStartTimeRef = useRef<number>(Date.now());
   const seenNotificationIdsRef = useRef<Set<string>>(new Set());
-  const isInitialNotificationLoadRef = useRef(true);
   const seenEmailIdsRef = useRef<Set<string>>(new Set());
   const isInitialMailLoadRef = useRef(true);
 
@@ -252,25 +252,28 @@ export const App: React.FC = () => {
   // 監聽系統通知推播與設定測試事件
   useEffect(() => {
     let unlistenNew: (() => void) | undefined;
-    let unlistenChanged: (() => void) | undefined;
     let unlistenTest: (() => void) | undefined;
 
-    // 1. 初次載入記住當前現有通知 ID，避免剛啟動時誤跳出歷史通知
+    // 1. 初次載入將當前所有既有通知 ID 記為已讀，防止剛啟動時彈出歷史通知
     invoke<any>("get_system_notifications")
       .then((res) => {
         if (res && Array.isArray(res.items)) {
           res.items.forEach((it: any) => seenNotificationIdsRef.current.add(it.id));
         }
       })
-      .catch(() => {})
-      .finally(() => {
-        isInitialNotificationLoadRef.current = false;
-      });
+      .catch(() => {});
 
-    // 2. 監聽 Rust 原生即時推播之新增通知事件
+    // 2. 監聽 Rust 原生即時推播之新增通知事件（嚴格過濾舊通知）
     listen<any>("new-system-notification", (event) => {
       const item = event.payload;
       if (item && (item.title || item.appName)) {
+        // 嚴格確保時間戳晚於軟體啟動時間，且尚未彈出過
+        if (item.timestamp && item.timestamp < appStartTimeRef.current - 2000) {
+          return;
+        }
+        if (seenNotificationIdsRef.current.has(item.id)) {
+          return;
+        }
         seenNotificationIdsRef.current.add(item.id);
         triggerAlert({
           type: "notification",
@@ -284,36 +287,7 @@ export const App: React.FC = () => {
       unlistenNew = fn;
     });
 
-    // 3. 監聽系統通知變更事件（作為多重備援比對機制）
-    listen("system-notifications-changed", async () => {
-      try {
-        const res = await invoke<any>("get_system_notifications");
-        if (res && Array.isArray(res.items)) {
-          if (isInitialNotificationLoadRef.current) {
-            res.items.forEach((it: any) => seenNotificationIdsRef.current.add(it.id));
-            isInitialNotificationLoadRef.current = false;
-            return;
-          }
-          for (const it of res.items) {
-            if (!seenNotificationIdsRef.current.has(it.id)) {
-              seenNotificationIdsRef.current.add(it.id);
-              triggerAlert({
-                type: "notification",
-                appName: it.appName || "系統通知",
-                title: it.title || it.body || "新通知",
-                body: it.body,
-                targetPage: "notifications",
-              });
-              break;
-            }
-          }
-        }
-      } catch {}
-    }).then((fn) => {
-      unlistenChanged = fn;
-    });
-
-    // 4. 監聽手動/測試跳轉事件（自設定視窗或廣播發出）
+    // 3. 監聽手動/測試跳轉事件（自設定視窗或廣播發出）
     listen<any>("trigger-island-alert", (event) => {
       if (event.payload) {
         triggerAlert(event.payload);
@@ -324,7 +298,6 @@ export const App: React.FC = () => {
 
     return () => {
       if (unlistenNew) unlistenNew();
-      if (unlistenChanged) unlistenChanged();
       if (unlistenTest) unlistenTest();
     };
   }, [triggerAlert]);
@@ -350,6 +323,10 @@ export const App: React.FC = () => {
           for (const m of emails) {
             if (!seenEmailIdsRef.current.has(m.id)) {
               seenEmailIdsRef.current.add(m.id);
+              // 僅在郵件時間戳晚於軟體啟動時間才跳出通知
+              if (m.timestamp && m.timestamp < appStartTimeRef.current - 5000) {
+                continue;
+              }
               triggerAlert({
                 type: "mail",
                 appName: m.accountName || "新郵件",

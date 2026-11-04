@@ -137,6 +137,9 @@ pub fn init(app: &AppHandle) -> Result<(), String> {
 }
 
 fn monitor_loop(service: Arc<NotificationService>) {
+    let started_at = current_unix_millis();
+    let mut is_first_run = true;
+
     loop {
         let (status, error, raw_items) = match fetch_system_notifications() {
             Ok((status, items)) => (status, None, items),
@@ -212,10 +215,12 @@ fn monitor_loop(service: Arc<NotificationService>) {
         let mut newly_added_item: Option<SystemNotificationItem> = None;
         if let Ok(mut current) = service.state.lock() {
             if current.status != status || current.error != error || current.items != active_items {
-                // 初次啟動不彈出歷史舊通知，僅在已有快照狀態下比對新增通知
-                if !current.items.is_empty() {
+                // 初次啟動或歷史通知絕不彈出，只有在軟體運行期間真正新到達（時間戳 >= started_at）的通知才觸發彈出
+                if !is_first_run && !current.items.is_empty() {
                     for item in &active_items {
-                        if !current.items.iter().any(|old| old.id == item.id) {
+                        if item.timestamp >= started_at - 1000
+                            && !current.items.iter().any(|old| old.id == item.id)
+                        {
                             newly_added_item = Some(item.clone());
                             break;
                         }
@@ -227,6 +232,8 @@ fn monitor_loop(service: Arc<NotificationService>) {
                 changed = true;
             }
         }
+
+        is_first_run = false;
 
         if changed {
             let _ = service.app.emit(NOTIFICATIONS_CHANGED_EVENT, ());
