@@ -288,3 +288,233 @@
   max-width: 320px;
   line-height: 1.4;
 }
+
+/* ==========================================================================
+   手風琴式資料夾卡片樣式（1 格高 ↔ 2 格高展開）
+   ========================================================================== */
+
+/* 1. 資料夾收合態（1 格高，約 38px） */
+.shelf-folder-collapsed {
+  border-color: rgba(245, 158, 11, 0.22);
+  background: rgba(245, 158, 11, 0.035);
+  cursor: pointer;
+}
+
+.shelf-folder-collapsed:hover {
+  border-color: rgba(245, 158, 11, 0.45);
+  background: rgba(245, 158, 11, 0.08);
+  transform: translateX(2px);
+}
+
+.file-icon-box.folder-box {
+  background: rgba(245, 158, 11, 0.14);
+}
+
+.folder-title-name {
+  color: #fde68a;
+  font-weight: 600;
+}
+
+.file-click-hint {
+  color: rgba(245, 158, 11, 0.75);
+  font-size: 9.5px;
+}
+
+.folder-collapsed-right {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.folder-count-pill {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 1px 7px;
+  border-radius: 999px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.action-btn.expand-toggle-btn {
+  color: #fbbf24;
+}
+
+.action-btn.expand-toggle-btn:hover {
+  background: rgba(245, 158, 11, 0.25);
+  color: #ffffff;
+}
+
+/* 2. 資料夾展開態（1 格高變 2 格高，約 80px） */
+.shelf-folder-card.is-expanded {
+  height: 80px;
+  min-height: 80px;
+  background: rgba(245, 158, 11, 0.05);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 8px;
+  padding: 6px 8px;
+  display: grid;
+  grid-template-columns: 125px 1fr 28px;
+  gap: 8px;
+  align-items: stretch;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+/* 左欄：資料夾名稱 + 拖整份 */
+.folder-left-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-right: 6px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: grab;
+  user-select: none;
+  overflow: hidden;
+}
+
+.folder-left-col:active {
+  cursor: grabbing;
+}
+
+.folder-left-top {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow: hidden;
+}
+
+.folder-left-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fde68a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-left-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.folder-left-count {
+  font-size: 10px;
+  font-weight: 600;
+  color: #fbbf24;
+}
+
+.folder-drag-hint {
+  font-size: 9px;
+  color: #94a3b8;
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.folder-left-col:hover .folder-drag-hint {
+  color: #38bdf8;
+  opacity: 1;
+}
+
+/* 中欄：子檔案滾動區（可捲動） */
+.folder-files-scroll-col {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
+
+.folder-subfiles-scroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3.5px;
+  padding-right: 4px;
+}
+
+.folder-subfiles-scroll::-webkit-scrollbar {
+  width: 3.5px;
+}
+
+.folder-subfiles-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+}
+
+.folder-subfiles-empty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.folder-subfile-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 11px;
+  color: #e2e8f0;
+  cursor: grab;
+  transition: all 0.15s ease;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.folder-subfile-item:active {
+  cursor: grabbing;
+}
+
+.folder-subfile-item:hover {
+  background: rgba(6, 182, 212, 0.18);
+  border-color: rgba(6, 182, 212, 0.4);
+  color: #ffffff;
+  transform: translateX(1.5px);
+}
+
+.subfile-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.subfile-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.subfile-size {
+  font-size: 9.5px;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+/* 右欄：操作按鈕區 */
+.folder-actions-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  padding-left: 4px;
+  flex-shrink: 0;
+}

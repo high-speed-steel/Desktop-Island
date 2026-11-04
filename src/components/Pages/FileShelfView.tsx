@@ -18,6 +18,8 @@ import {
   FolderOpen,
   Plus,
   GripVertical,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import "./FileShelfView.css";
 
@@ -27,6 +29,8 @@ export interface ShelfFile {
   size: string;
   path: string;
   isDir?: boolean;
+  children?: ShelfFile[];
+  childCount?: number;
   addedAt: string;
 }
 
@@ -53,6 +57,7 @@ export const FileShelfView: React.FC = () => {
     return [];
   });
 
+  const [expandedFolderId, setExpandedFolderId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -65,6 +70,82 @@ export const FileShelfView: React.FC = () => {
       console.warn("保存暫存檔案失敗:", e);
     }
   }, [files]);
+
+  // 初始掛載時：為尚未讀取子檔案的現有資料夾補齊檔案清單與計數
+  useEffect(() => {
+    const refreshFolderCounts = async () => {
+      let hasUpdate = false;
+      const updated = await Promise.all(
+        files.map(async (file) => {
+          if (file.isDir && (!file.children || file.childCount === undefined)) {
+            try {
+              const subFiles = await invoke<ShelfFileInfo[]>("get_dir_children", {
+                path: file.path,
+              });
+              hasUpdate = true;
+              const children: ShelfFile[] = subFiles.map((c) => ({
+                id: `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+                name: c.name,
+                path: c.path,
+                size: c.sizeFormatted,
+                isDir: c.isDir,
+                addedAt: file.addedAt,
+              }));
+              return {
+                ...file,
+                children,
+                childCount: children.length,
+                size: `${children.length} 個項目`,
+              };
+            } catch {
+              return file;
+            }
+          }
+          return file;
+        })
+      );
+      if (hasUpdate) {
+        setFiles(updated);
+      }
+    };
+    refreshFolderCounts();
+  }, []);
+
+  // 點擊資料夾切換展開/收合（手風琴模式）
+  const toggleFolderExpand = async (folder: ShelfFile) => {
+    if (expandedFolderId === folder.id) {
+      setExpandedFolderId(null);
+      return;
+    }
+    setExpandedFolderId(folder.id);
+    try {
+      const subFiles = await invoke<ShelfFileInfo[]>("get_dir_children", {
+        path: folder.path,
+      });
+      const childrenEntries: ShelfFile[] = subFiles.map((c) => ({
+        id: `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        name: c.name,
+        path: c.path,
+        size: c.sizeFormatted,
+        isDir: c.isDir,
+        addedAt: folder.addedAt,
+      }));
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === folder.id
+            ? {
+                ...f,
+                children: childrenEntries,
+                childCount: childrenEntries.length,
+                size: `${childrenEntries.length} 個項目`,
+              }
+            : f
+        )
+      );
+    } catch (err) {
+      console.warn("讀取資料夾檔案失敗:", err);
+    }
+  };
 
   // 新增檔案路徑清單至暫存板
   const addFilePaths = async (paths: string[]) => {
@@ -79,12 +160,36 @@ export const FileShelfView: React.FC = () => {
     for (const path of paths) {
       try {
         const info = await invoke<ShelfFileInfo>("get_file_info", { path });
+        let children: ShelfFile[] | undefined;
+        let childCount: number | undefined;
+
+        if (info.isDir) {
+          try {
+            const subFiles = await invoke<ShelfFileInfo[]>("get_dir_children", {
+              path: info.path,
+            });
+            children = subFiles.map((c) => ({
+              id: `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+              name: c.name,
+              path: c.path,
+              size: c.sizeFormatted,
+              isDir: c.isDir,
+              addedAt: nowStr,
+            }));
+            childCount = children.length;
+          } catch (err) {
+            console.warn("無法取得資料夾內容:", err);
+          }
+        }
+
         newEntries.push({
           id: `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
           name: info.name,
           path: info.path,
-          size: info.sizeFormatted,
+          size: info.isDir ? `${childCount ?? 0} 個項目` : info.sizeFormatted,
           isDir: info.isDir,
+          children,
+          childCount,
           addedAt: nowStr,
         });
       } catch {
@@ -316,6 +421,169 @@ export const FileShelfView: React.FC = () => {
           files.map((file) => {
             const isCopied = copiedId === file.id;
 
+            // 資料夾項目
+            if (file.isDir) {
+              const isExpanded = expandedFolderId === file.id;
+              const count = file.childCount ?? file.children?.length ?? 0;
+
+              // 展開態（1 格高變 2 格高，左右分工拖曳）
+              if (isExpanded) {
+                return (
+                  <div
+                    key={file.id}
+                    className="shelf-folder-card is-expanded"
+                  >
+                    {/* 左欄：資料夾名稱，按住可拖出「整個資料夾」，點擊可收合 */}
+                    <div
+                      className="folder-left-col"
+                      draggable={true}
+                      onDragStart={(e) => handleDragOut(e, file)}
+                      onClick={() => setExpandedFolderId(null)}
+                      title={`按住拖出「整個資料夾」；點擊收合回 1 格：${file.name}`}
+                    >
+                      <div className="folder-left-top">
+                        <Folder size={15} className="text-amber-400 flex-shrink-0" />
+                        <span className="folder-left-name" title={file.name}>
+                          {file.name}
+                        </span>
+                      </div>
+                      <div className="folder-left-bottom">
+                        <span className="folder-left-count">{count} 個檔案</span>
+                        <span className="folder-drag-hint">拖整份 · 點擊收合</span>
+                      </div>
+                    </div>
+
+                    {/* 中欄：子檔案清單（縱向可捲動，按住各檔案只拖出該檔案） */}
+                    <div className="folder-files-scroll-col">
+                      {!file.children || file.children.length === 0 ? (
+                        <div className="folder-subfiles-empty">
+                          <Folder size={16} opacity={0.3} />
+                          <span>此資料夾內沒有檔案</span>
+                        </div>
+                      ) : (
+                        <div className="folder-subfiles-scroll">
+                          {file.children.map((sub) => (
+                            <div
+                              key={sub.id || sub.path}
+                              className="folder-subfile-item"
+                              draggable={true}
+                              onDragStart={(e) => {
+                                e.stopPropagation();
+                                handleDragOut(e, sub);
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenFile(sub);
+                              }}
+                              title={`按住拖出此檔案：${sub.name}；點擊直接開啟`}
+                            >
+                              <div className="subfile-icon">{getFileIcon(sub)}</div>
+                              <span className="subfile-name" title={sub.name}>
+                                {sub.name}
+                              </span>
+                              <span className="subfile-size">{sub.size}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 右欄：操作按鈕區 */}
+                    <div className="folder-actions-col">
+                      <button
+                        className="action-btn"
+                        type="button"
+                        onClick={(e) => handleReveal(e, file)}
+                        title="在檔案總管中顯示"
+                      >
+                        <FolderOpen size={12} />
+                      </button>
+                      <button
+                        className="action-btn"
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpandedFolderId(null);
+                        }}
+                        title="收合資料夾"
+                      >
+                        <ChevronUp size={12} />
+                      </button>
+                      <button
+                        className="action-btn delete-btn"
+                        type="button"
+                        onClick={(e) => handleRemove(e, file.id)}
+                        title="從暫存移除資料夾"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
+
+              // 收合態（1 格高，點擊展開，按住拖出整個資料夾）
+              return (
+                <div
+                  key={file.id}
+                  className="shelf-file-card shelf-folder-collapsed"
+                  draggable={true}
+                  onDragStart={(e) => handleDragOut(e, file)}
+                  onClick={() => toggleFolderExpand(file)}
+                  title={`點擊展開；按住直接拖出整個資料夾：${file.name}`}
+                >
+                  <div
+                    className="drag-grip"
+                    title="按住拖出整個資料夾"
+                    onDragStart={(e) => handleDragOut(e, file)}
+                  >
+                    <GripVertical size={13} className="text-gray-500" />
+                  </div>
+
+                  <div className="file-icon-box folder-box">
+                    <Folder size={17} className="text-amber-400" />
+                  </div>
+
+                  <div className="file-details">
+                    <div className="file-name folder-title-name" title={file.name}>
+                      {file.name}
+                    </div>
+                    <div className="file-meta">
+                      <span>資料夾</span>
+                      <span>·</span>
+                      <span className="file-click-hint">點一下展開</span>
+                    </div>
+                  </div>
+
+                  <div className="folder-collapsed-right">
+                    <span className="folder-count-pill" title={`${count} 個檔案`}>
+                      {count}
+                    </span>
+                    <button
+                      className="action-btn expand-toggle-btn"
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFolderExpand(file);
+                      }}
+                      title="點擊展開"
+                    >
+                      <ChevronDown size={13} />
+                    </button>
+                    <button
+                      className="action-btn delete-btn"
+                      type="button"
+                      onClick={(e) => handleRemove(e, file.id)}
+                      title="從暫存移除資料夾"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+              );
+            }
+
+            // 一般單一檔案項目
             return (
               <div
                 key={file.id}

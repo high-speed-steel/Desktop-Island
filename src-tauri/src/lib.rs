@@ -683,6 +683,54 @@ fn get_file_info(path: String) -> Result<ShelfFileInfo, String> {
 }
 
 #[tauri::command]
+fn get_dir_children(path: String) -> Result<Vec<ShelfFileInfo>, String> {
+    let p = Path::new(&path);
+    if !p.exists() || !p.is_dir() {
+        return Err(format!("Directory does not exist: {path}"));
+    }
+    let read_dir = fs::read_dir(p).map_err(|e| e.to_string())?;
+    let mut results = Vec::new();
+    for entry in read_dir {
+        if let Ok(entry) = entry {
+            let entry_path = entry.path();
+            let entry_path_str = entry_path.to_string_lossy().to_string();
+            let name = entry.file_name().to_string_lossy().to_string();
+            let is_dir = entry_path.is_dir();
+            let size_formatted = if is_dir {
+                "資料夾".to_string()
+            } else if let Ok(meta) = entry.metadata() {
+                let bytes = meta.len();
+                if bytes < 1024 {
+                    format!("{bytes} B")
+                } else if bytes < 1024 * 1024 {
+                    format!("{:.1} KB", bytes as f64 / 1024.0)
+                } else if bytes < 1024 * 1024 * 1024 {
+                    format!("{:.1} MB", bytes as f64 / (1024.0 * 1024.0))
+                } else {
+                    format!("{:.2} GB", bytes as f64 / (1024.0 * 1024.0 * 1024.0))
+                }
+            } else {
+                "檔案".to_string()
+            };
+            results.push(ShelfFileInfo {
+                path: entry_path_str,
+                name,
+                size_formatted,
+                is_dir,
+            });
+        }
+    }
+    results.sort_by(|a, b| {
+        match (a.is_dir, b.is_dir) {
+            (true, false) => std::cmp::Ordering::Less,
+            (false, true) => std::cmp::Ordering::Greater,
+            _ => a.name.to_lowercase().cmp(&b.name.to_lowercase()),
+        }
+    });
+    Ok(results)
+}
+
+#[tauri::command]
 async fn get_agent_status(app: AppHandle) -> Result<AgentStatusSnapshot, String> {
     tauri::async_runtime::spawn_blocking(move || read_agent_status(app))
         .await
@@ -2202,6 +2250,7 @@ pub fn run() {
             save_full_app_config,
             open_settings_window,
             get_file_info,
+            get_dir_children,
             fetch_emails,
             test_mail_connection,
             notifications::get_system_notifications,
