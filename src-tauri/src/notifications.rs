@@ -74,6 +74,7 @@ struct NotificationService {
     app: AppHandle,
     state: Mutex<NotificationSnapshot>,
     settings: Mutex<NotificationAppSettings>,
+    dismissed_ids: Mutex<HashSet<String>>,
 }
 
 fn get_notification_apps_path() -> PathBuf {
@@ -119,6 +120,7 @@ pub fn init(app: &AppHandle) -> Result<(), String> {
             items: Vec::new(),
         }),
         settings: Mutex::new(initial_settings),
+        dismissed_ids: Mutex::new(HashSet::new()),
     });
 
     let _ = NOTIFICATION_SERVICE.set(service.clone());
@@ -180,20 +182,39 @@ fn monitor_loop(service: Arc<NotificationService>) {
                 .collect();
 
             raw_items
-                .into_iter()
+                .iter()
                 .filter(|it| wl_set.contains(&it.app_name.trim().to_lowercase()))
+                .cloned()
                 .collect()
         } else {
-            raw_items
+            raw_items.clone()
         };
+
+        // 3. 過濾使用者在靈動島中已清空或手動刪除的通知 ID
+        let dismissed_set = service
+            .dismissed_ids
+            .lock()
+            .map(|d| d.clone())
+            .unwrap_or_default();
+
+        let active_items: Vec<SystemNotificationItem> = filtered_items
+            .into_iter()
+            .filter(|it| !dismissed_set.contains(&it.id))
+            .collect();
+
+        // 4. 定期維護 dismissed_ids，僅保留 Windows 端仍存在的 ID，當 Windows 清除時隨之釋放
+        if let Ok(mut dismissed) = service.dismissed_ids.lock() {
+            let all_raw_ids: HashSet<String> = raw_items.iter().map(|it| it.id.clone()).collect();
+            dismissed.retain(|id| all_raw_ids.contains(id));
+        }
 
         let mut changed = false;
         let mut newly_added_item: Option<SystemNotificationItem> = None;
         if let Ok(mut current) = service.state.lock() {
-            if current.status != status || current.error != error || current.items != filtered_items {
+            if current.status != status || current.error != error || current.items != active_items {
                 // 初次啟動不彈出歷史舊通知，僅在已有快照狀態下比對新增通知
                 if !current.items.is_empty() {
-                    for item in &filtered_items {
+                    for item in &active_items {
                         if !current.items.iter().any(|old| old.id == item.id) {
                             newly_added_item = Some(item.clone());
                             break;
@@ -202,7 +223,7 @@ fn monitor_loop(service: Arc<NotificationService>) {
                 }
                 current.status = status;
                 current.error = error;
-                current.items = filtered_items;
+                current.items = active_items;
                 changed = true;
             }
         }
@@ -391,8 +412,52 @@ pub fn clear_system_notifications() -> Result<(), String> {
         .get()
         .ok_or_else(|| "Notification service not initialized".to_string())?;
 
+    // 1. 嘗試調用 Windows WinRT API 清除 Action Center 中的通知
+    let _ = (|| -> Result<(), String> {
+        unsafe { RoInitialize(RO_INIT_MULTITHREADED) }.map_err(|e| e.to_string())?;
+        let _apartment = WinRT;
+        let listener = UserNotificationListener::Current().map_err(|e| e.to_string())?;
+        let _ = listener.ClearNotifications();
+        Ok(())
+    })();
+
+    // 2. 將當前所有通知 ID 記錄至 dismissed_ids，防止背景 monitor_loop 重新拾取回填
     if let Ok(mut state) = service.state.lock() {
+        if let Ok(mut dismissed) = service.dismissed_ids.lock() {
+            for it in &state.items {
+                dismissed.insert(it.id.clone());
+            }
+        }
         state.items.clear();
+    }
+
+    let _ = service.app.emit(NOTIFICATIONS_CHANGED_EVENT, ());
+    Ok(())
+}
+
+#[tauri::command]
+pub fn remove_system_notification(id: String) -> Result<(), String> {
+    let service = NOTIFICATION_SERVICE
+        .get()
+        .ok_or_else(|| "Notification service not initialized".to_string())?;
+
+    // 嘗試調用 Windows API 移除該單條通知
+    if let Ok(u_id) = id.parse::<u32>() {
+        let _ = (|| -> Result<(), String> {
+            unsafe { RoInitialize(RO_INIT_MULTITHREADED) }.map_err(|e| e.to_string())?;
+            let _apartment = WinRT;
+            let listener = UserNotificationListener::Current().map_err(|e| e.to_string())?;
+            let _ = listener.RemoveNotification(u_id);
+            Ok(())
+        })();
+    }
+
+    if let Ok(mut dismissed) = service.dismissed_ids.lock() {
+        dismissed.insert(id.clone());
+    }
+
+    if let Ok(mut state) = service.state.lock() {
+        state.items.retain(|it| it.id != id);
     }
 
     let _ = service.app.emit(NOTIFICATIONS_CHANGED_EVENT, ());

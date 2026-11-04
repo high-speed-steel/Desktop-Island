@@ -103,6 +103,19 @@ export const SpecialNotificationsView: React.FC = () => {
     }
   };
 
+  const handleRemoveSingle = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    try {
+      await invoke("remove_system_notification", { id });
+      setSnapshot((prev) => ({
+        ...prev,
+        items: prev.items.filter((it) => it.id !== id),
+      }));
+    } catch (err) {
+      console.error("刪除單則通知失敗:", err);
+    }
+  };
+
   const handleRequestPermission = async () => {
     setRequesting(true);
     try {
@@ -416,7 +429,17 @@ export const SpecialNotificationsView: React.FC = () => {
             <div key={item.id} className="notif-card">
               <div className="notif-card-header">
                 <span className="source-badge">{item.appName}</span>
-                <span className="notif-time">{item.time}</span>
+                <div className="notif-card-meta">
+                  <span className="notif-time">{item.time}</span>
+                  <button
+                    type="button"
+                    className="notif-item-delete-btn"
+                    onClick={(e) => handleRemoveSingle(e, item.id)}
+                    title="移除此通知"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
               </div>
               <div className="notif-item-title">{item.title}</div>
               {item.body && <div className="notif-item-body">{item.body}</div>}

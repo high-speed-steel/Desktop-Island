@@ -2207,6 +2207,7 @@ pub fn run() {
             notifications::get_system_notifications,
             notifications::request_notification_permission,
             notifications::clear_system_notifications,
+            notifications::remove_system_notification,
             notifications::get_notification_app_settings,
             notifications::save_notification_app_settings,
             notifications::get_notification_apps_file_path,

@@ -407,10 +407,40 @@
   text-overflow: ellipsis;
 }
 
+.notif-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .notif-time {
   font-size: 10px;
   color: #9ca3af;
   opacity: 0.8;
+}
+
+.notif-item-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all 0.15s ease;
+}
+
+.notif-card:hover .notif-item-delete-btn {
+  opacity: 0.8;
+}
+
+.notif-item-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171 !important;
+  opacity: 1 !important;
 }
 
 .notif-item-title {
