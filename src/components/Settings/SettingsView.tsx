@@ -8,6 +8,7 @@ import {
   TODO_STORAGE_KEY,
   todosToMarkdown,
   markdownToTodos,
+  getLocalDateString,
   type TodoItem,
 } from '../Pages/TodoView';
 import {
@@ -162,7 +163,7 @@ export const SettingsView: React.FC = () => {
     });
 
     // 啟動時讀取磁碟上的待辦 Markdown 檔案（開啟就是要讀檔）
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getLocalDateString();
     invoke<string>('get_default_todo_save_directory')
       .then((dir) => {
         setTodoSavePath(dir);
@@ -198,17 +199,19 @@ export const SettingsView: React.FC = () => {
       // 2. 儲存多信箱帳戶
       localStorage.setItem(MAIL_STORAGE_KEY, JSON.stringify(mailAccounts));
 
-      // 3. 儲存待辦事項（解析 Markdown 寫入 localStorage，並持久化至磁碟 Markdown 檔案）
-      const parsedTodos = markdownToTodos(todoMarkdown);
-      localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(parsedTodos));
+      // 3. 儲存待辦事項（僅在待辦 Markdown 分頁編輯時同步回 localStorage 與磁碟）
+      if (activeTab === 'todoMarkdown') {
+        const parsedTodos = markdownToTodos(todoMarkdown);
+        localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(parsedTodos));
 
-      const today = new Date().toISOString().slice(0, 10);
-      const targetDir = todoSavePath || (await invoke<string>('get_default_todo_save_directory'));
-      await invoke('save_todo_markdown', {
-        directory: targetDir,
-        date: today,
-        content: todoMarkdown,
-      }).catch((e) => console.warn('寫入磁碟 Markdown 檔案失敗:', e));
+        const today = getLocalDateString();
+        const targetDir = todoSavePath || (await invoke<string>('get_default_todo_save_directory'));
+        await invoke('save_todo_markdown', {
+          directory: targetDir,
+          date: today,
+          content: todoMarkdown,
+        }).catch((e) => console.warn('寫入磁碟 Markdown 檔案失敗:', e));
+      }
 
       // 4. 儲存全域 appConfig
       if (appConfig) {
@@ -228,7 +231,11 @@ export const SettingsView: React.FC = () => {
       window.dispatchEvent(new Event('storage'));
 
       // 6. 成功反饋
-      setSaveToast('✓ 設定與待辦清單已成功儲存至磁碟並即時同步！');
+      setSaveToast(
+        activeTab === 'todoMarkdown'
+          ? '✓ 設定與待辦清單已成功儲存至磁碟並即時同步！'
+          : '✓ 設定已成功儲存並即時同步！'
+      );
       setTimeout(() => setSaveToast(null), 3000);
     } catch (err) {
       console.error('儲存設定失敗:', err);
@@ -467,7 +474,16 @@ export const SettingsView: React.FC = () => {
           <div className="sidebar-group-label mt-4">任務與待辦</div>
           <button
             className={`nav-tab-btn ${activeTab === 'todoMarkdown' ? 'active' : ''}`}
-            onClick={() => setActiveTab('todoMarkdown')}
+            onClick={() => {
+              setActiveTab('todoMarkdown');
+              try {
+                const stored = localStorage.getItem(TODO_STORAGE_KEY);
+                if (stored) {
+                  const todos: TodoItem[] = JSON.parse(stored);
+                  setTodoMarkdown(todosToMarkdown(todos));
+                }
+              } catch {}
+            }}
           >
             <span className="nav-icon">📝</span>
             <span className="nav-btn-text">待辦清單 Markdown</span>

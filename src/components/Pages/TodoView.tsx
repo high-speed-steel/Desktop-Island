@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { Plus, Check, Trash2, ListTodo } from "lucide-react";
 import "./TodoView.css";
 
@@ -10,6 +11,13 @@ export interface TodoItem {
 }
 
 export const TODO_STORAGE_KEY = "focusd-island-todos";
+
+export const getLocalDateString = (d: Date = new Date()): string => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 
 /**
  * 將 TodoItem 清單轉為標準 Markdown 待辦格式
@@ -46,7 +54,7 @@ export function markdownToTodos(md: string): TodoItem[] {
       const text = taskMatch[2].trim();
       if (text) {
         items.push({
-          id: `${Date.now()}_${index++}`,
+          id: `todo_${index++}_${encodeURIComponent(text.slice(0, 16))}`,
           title: text,
           completed: isCompleted,
           createdAt: Date.now(),
@@ -61,7 +69,7 @@ export function markdownToTodos(md: string): TodoItem[] {
       const text = bulletMatch[1].trim();
       if (text && !text.startsWith("#")) {
         items.push({
-          id: `${Date.now()}_${index++}`,
+          id: `todo_${index++}_${encodeURIComponent(text.slice(0, 16))}`,
           title: text,
           completed: false,
           createdAt: Date.now(),
@@ -79,7 +87,8 @@ export const TodoView: React.FC = () => {
     try {
       const stored = localStorage.getItem(TODO_STORAGE_KEY);
       if (stored) {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch {
       // 忽略
@@ -88,6 +97,83 @@ export const TodoView: React.FC = () => {
   });
 
   const [inputTitle, setInputTitle] = useState("");
+  const isLoadedRef = useRef(false);
+
+  // 雙向持久化：儲存至 localStorage 並即時寫入本機磁碟 Markdown 檔案
+  const persistTodos = useCallback((newTodos: TodoItem[]) => {
+    try {
+      localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(newTodos));
+      window.dispatchEvent(new Event("storage"));
+    } catch (e) {
+      console.warn("寫入 localStorage 待辦失敗:", e);
+    }
+
+    invoke<string>("get_default_todo_save_directory")
+      .then((dir) => {
+        const date = getLocalDateString();
+        const content = todosToMarkdown(newTodos);
+        return invoke("save_todo_markdown", {
+          directory: dir,
+          date,
+          content,
+        });
+      })
+      .catch((err) => {
+        console.warn("寫入磁碟待辦 Markdown 失敗:", err);
+      });
+  }, []);
+
+  // 啟動時自動從磁碟 Markdown 檔案同步讀取，確保重啟或關閉後完美記憶
+  useEffect(() => {
+    let isCancelled = false;
+
+    const syncWithDisk = async () => {
+      try {
+        const dir = await invoke<string>("get_default_todo_save_directory");
+        const date = getLocalDateString();
+        const diskContent = await invoke<string>("read_todo_markdown", {
+          directory: dir,
+          date,
+        });
+
+        if (isCancelled) return;
+
+        if (diskContent && diskContent.trim().length > 0) {
+          const diskTodos = markdownToTodos(diskContent);
+          if (diskTodos.length > 0) {
+            setTodos(diskTodos);
+            localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(diskTodos));
+            isLoadedRef.current = true;
+            return;
+          }
+        }
+
+        // 若磁碟今日無檔案但 localStorage 中有記憶待辦，立即補回磁碟存檔
+        const stored = localStorage.getItem(TODO_STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const md = todosToMarkdown(parsed);
+            await invoke("save_todo_markdown", {
+              directory: dir,
+              date,
+              content: md,
+            });
+          }
+        }
+      } catch (err) {
+        console.warn("讀取磁碟待辦失敗:", err);
+      } finally {
+        isLoadedRef.current = true;
+      }
+    };
+
+    syncWithDisk();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   // 監聽外部（例如設定視窗）發來的 storage 變更
   useEffect(() => {
@@ -95,7 +181,10 @@ export const TodoView: React.FC = () => {
       try {
         const stored = localStorage.getItem(TODO_STORAGE_KEY);
         if (stored) {
-          setTodos(JSON.parse(stored));
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            setTodos(parsed);
+          }
         }
       } catch {
         // 忽略
@@ -105,30 +194,32 @@ export const TodoView: React.FC = () => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todos));
-  }, [todos]);
-
   const handleAddTodo = () => {
     if (!inputTitle.trim()) return;
     const newItem: TodoItem = {
-      id: Date.now().toString(),
+      id: `${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
       title: inputTitle.trim(),
       completed: false,
       createdAt: Date.now(),
     };
-    setTodos([newItem, ...todos]);
+    const next = [newItem, ...todos];
+    setTodos(next);
     setInputTitle("");
+    persistTodos(next);
   };
 
   const handleToggle = (id: string) => {
-    setTodos(
-      todos.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)),
+    const next = todos.map((t) =>
+      t.id === id ? { ...t, completed: !t.completed } : t
     );
+    setTodos(next);
+    persistTodos(next);
   };
 
   const handleDelete = (id: string) => {
-    setTodos(todos.filter((t) => t.id !== id));
+    const next = todos.filter((t) => t.id !== id);
+    setTodos(next);
+    persistTodos(next);
   };
 
   return (
