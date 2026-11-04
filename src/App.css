@@ -908,6 +908,55 @@ body, html {
   color: #ef4444 !important;
 }
 
+/* 白玻璃專屬：強化滑鼠跟隨光暈、菱鏡色散折射與邊緣流光高光 */
+.appearance-whiteGlass .island__glass::before,
+.appearance-classic .island__glass::before {
+  width: 62%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(56, 189, 248, 0.42) 32%,
+    rgba(168, 85, 247, 0.22) 55%,
+    transparent 74%
+  ) !important;
+  filter: blur(18px) !important;
+  opacity: 1 !important;
+}
+
+.appearance-whiteGlass .island__glass::after,
+.appearance-classic .island__glass::after {
+  background:
+    linear-gradient(115deg, rgba(56, 189, 248, 0.28), transparent 22% 76%, rgba(236, 72, 153, 0.24)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.65), transparent 28% 82%, rgba(56, 189, 248, 0.16)) !important;
+  mix-blend-mode: normal !important;
+  opacity: 0.92 !important;
+}
+
+.appearance-whiteGlass .island__glass-refraction,
+.appearance-classic .island__glass-refraction {
+  border: 1.2px solid rgba(255, 255, 255, 0.88) !important;
+  box-shadow:
+    inset 0 0 22px rgba(56, 189, 248, 0.26),
+    inset 0 1px 3px rgba(255, 255, 255, 0.95) !important;
+}
+
+.appearance-whiteGlass .island__glass-highlight,
+.appearance-classic .island__glass-highlight {
+  height: 2.5px !important;
+  width: 52% !important;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(56, 189, 248, 0.75) 20%,
+    rgba(255, 255, 255, 1) 50%,
+    rgba(168, 85, 247, 0.75) 80%,
+    transparent
+  ) !important;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.65), 0 0 4px rgba(255, 255, 255, 0.95) !important;
+  filter: blur(0.2px) !important;
+  opacity: 1 !important;
+}
+
 /* --------------------------------------------------------------------------
    7. 亮色主題全方位深色文字與高對比適配 (純白 pureWhite 與 白玻璃 whiteGlass)
    -------------------------------------------------------------------------- */
