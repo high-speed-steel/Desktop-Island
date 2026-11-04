@@ -138,6 +138,7 @@ body, html {
 
 .capsule-ticker {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   white-space: nowrap;
   z-index: 2;
@@ -150,7 +151,38 @@ body, html {
   align-items: center;
   gap: 6px;
   overflow: hidden;
+  max-width: 100%;
+}
+
+.ticker-title {
+  overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.ticker-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+  font-size: 11.5px;
+  letter-spacing: 0.2px;
+  user-select: none;
+}
+
+.ticker-time-divider {
+  opacity: 0.4;
+  font-weight: 300;
+  font-size: 11px;
+}
+
+.ticker-time-clock {
+  font-weight: 500;
 }
 
 .inline-icon {

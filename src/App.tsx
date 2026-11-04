@@ -61,9 +61,23 @@ const PAGES: { id: IslandPage; label: string; icon: React.ReactNode }[] = [
   { id: "translation", label: "翻譯", icon: <Languages size={12} /> },
 ];
 
+const formatCapsuleTime = (date: Date = new Date()): string => {
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${hours} : ${minutes}`;
+};
+
 export const App: React.FC = () => {
   const [mode, setMode] = useState<IslandMode>("collapsed");
   const [activePage, setActivePage] = useState<IslandPage>("music");
+
+  // 膠囊摺疊態即時時間更新（格式：hh : mm）
+  const [currentTime, setCurrentTime] = useState<string>(() => formatCapsuleTime());
+  useEffect(() => {
+    const updateTime = () => setCurrentTime(formatCapsuleTime());
+    const timer = setInterval(updateTime, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // 外觀風格，預設純黑風格
   const [appearanceMode, setAppearanceMode] = useState<AppearanceMode>(() => {
@@ -144,7 +158,7 @@ export const App: React.FC = () => {
       expandedScale: 1.0,
       margin_y: 0.0,
       expandedHeight: isExpanded ? 385 : 36,
-      collapsedWidth: 260,
+      collapsedWidth: 300,
     }).catch(() => {
       // 容錯（在非 Tauri 瀏覽器環境下忽略）
     });
@@ -458,17 +472,19 @@ export const App: React.FC = () => {
             )}
           </div>
 
-          {/* 膠囊動態資訊：常駐播放與系統資訊 */}
+          {/* 膠囊動態資訊：常駐播放與系統資訊，後綴即時時間 (| hh : mm) */}
           <div className="capsule-ticker">
-            {mediaState.playbackStatus === "playing" ? (
-              <span className="ticker-text music-text">
-                {mediaState.title} - {mediaState.artist}
+            <span className={`ticker-text ${mediaState.playbackStatus === "playing" ? "music-text" : "system-text"}`}>
+              <span className="ticker-title">
+                {mediaState.playbackStatus === "playing"
+                  ? `${mediaState.title || "未知曲目"}${mediaState.artist ? ` - ${mediaState.artist}` : ""}`
+                  : "Desktop Island 靈動島"}
               </span>
-            ) : (
-              <span className="ticker-text system-text">
-                Desktop Island 靈動島
+              <span className="ticker-time">
+                <span className="ticker-time-divider">|</span>
+                <span className="ticker-time-clock">{currentTime}</span>
               </span>
-            )}
+            </span>
           </div>
 
           {/* 右側插槽：播放中顯示律動音訊波浪，未播放時顯示指示燈 */}
