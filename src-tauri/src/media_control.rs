@@ -34,7 +34,8 @@ use windows::{
 };
 
 const AUDIO_ACTIVE_THRESHOLD: f32 = 0.000015;
-const MAX_THUMBNAIL_BYTES: u64 = 4_000_000;
+const MAX_THUMBNAIL_BYTES: u64 = 1_500_000;
+const MAX_THUMBNAIL_DIMENSION: u32 = 300;
 /// 100ns ticks between the Windows epoch (1601-01-01) and the Unix epoch.
 const WINDOWS_EPOCH_OFFSET_TICKS: i64 = 116_444_736_000_000_000;
 
@@ -668,6 +669,24 @@ fn read_thumbnail(reference: &IRandomAccessStreamReference) -> Option<String> {
     // content type: some apps (e.g. NetEase Cloud Music) report a comma-joined
     // list like "image/jpeg,image/jpe,image/jpg", which breaks the data URL.
     let mime = detect_image_mime(&buffer);
+
+    // Downscale oversized album art to save RAM in WebView2
+    if let Ok(dyn_img) = image::load_from_memory(&buffer) {
+        let (w, h) = (dyn_img.width(), dyn_img.height());
+        if w > MAX_THUMBNAIL_DIMENSION || h > MAX_THUMBNAIL_DIMENSION {
+            let resized = dyn_img.resize(
+                MAX_THUMBNAIL_DIMENSION,
+                MAX_THUMBNAIL_DIMENSION,
+                image::imageops::FilterType::Triangle,
+            );
+            let mut out = std::io::Cursor::new(Vec::new());
+            if resized.write_to(&mut out, image::ImageFormat::Png).is_ok() {
+                let encoded = base64::engine::general_purpose::STANDARD.encode(out.into_inner());
+                return Some(format!("data:image/png;base64,{encoded}"));
+            }
+        }
+    }
+
     let encoded = base64::engine::general_purpose::STANDARD.encode(&buffer);
     Some(format!("data:{mime};base64,{encoded}"))
 }

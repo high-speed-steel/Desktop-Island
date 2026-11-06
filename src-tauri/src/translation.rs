@@ -52,7 +52,15 @@ pub fn init(app: &AppHandle) {
     }
 }
 
-static ENGINE_CACHE: Mutex<Option<HashMap<(String, String), Arc<Translation>>>> = Mutex::new(None);
+const MODEL_IDLE_TIMEOUT: Duration = Duration::from_secs(45);
+
+struct CachedEngine {
+    engine: Arc<Translation>,
+    last_used: Instant,
+}
+
+static ENGINE_CACHE: Mutex<Option<HashMap<(String, String), CachedEngine>>> = Mutex::new(None);
+static CLEANUP_RUNNING: AtomicBool = AtomicBool::new(false);
 
 #[tauri::command]
 pub fn toggle_translation_window(app: AppHandle) -> Result<(), String> {
@@ -158,13 +166,44 @@ pub fn delete_translation_secret() -> Result<(), String> {
     Ok(())
 }
 
+fn schedule_cache_cleanup() {
+    if CLEANUP_RUNNING
+        .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
+        .is_err()
+    {
+        return;
+    }
+
+    thread::spawn(|| loop {
+        thread::sleep(Duration::from_secs(15));
+        let mut guard = match ENGINE_CACHE.lock() {
+            Ok(g) => g,
+            Err(_) => break,
+        };
+
+        if let Some(map) = guard.as_mut() {
+            let now = Instant::now();
+            map.retain(|_, cached| now.duration_since(cached.last_used) < MODEL_IDLE_TIMEOUT);
+            if map.is_empty() {
+                *guard = None;
+                CLEANUP_RUNNING.store(false, Ordering::SeqCst);
+                break;
+            }
+        } else {
+            CLEANUP_RUNNING.store(false, Ordering::SeqCst);
+            break;
+        }
+    });
+}
+
 fn get_or_load_engine(src: &str, trg: &str) -> Result<Arc<Translation>, String> {
     let key = (src.to_string(), trg.to_string());
     {
         let mut guard = ENGINE_CACHE.lock().map_err(|e| e.to_string())?;
         let cache_map = guard.get_or_insert_with(HashMap::new);
-        if let Some(engine) = cache_map.get(&key) {
-            return Ok(Arc::clone(engine));
+        if let Some(cached) = cache_map.get_mut(&key) {
+            cached.last_used = Instant::now();
+            return Ok(Arc::clone(&cached.engine));
         }
     }
 
@@ -184,7 +223,14 @@ fn get_or_load_engine(src: &str, trg: &str) -> Result<Arc<Translation>, String> 
                 let arc = Arc::new(engine);
                 let mut guard = ENGINE_CACHE.lock().map_err(|e| e.to_string())?;
                 let cache_map = guard.get_or_insert_with(HashMap::new);
-                cache_map.insert(key, Arc::clone(&arc));
+                cache_map.insert(
+                    key,
+                    CachedEngine {
+                        engine: Arc::clone(&arc),
+                        last_used: Instant::now(),
+                    },
+                );
+                schedule_cache_cleanup();
                 return Ok(arc);
             }
             Err(err) => {
